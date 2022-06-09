@@ -66,6 +66,16 @@ void bigsigned_test(){
 	output = bignum_signed_to_int(&result);
 	bignum_signed_to_string(&result, buf, sizeof(buf));
 	printf("sub result: %s (%i)\n", buf, output);
+
+
+	bignum_signed_from_int(&num, 20);
+	bignum_signed_from_int(&tmp, 50);
+	bignum_signed_sub(&num, &tmp, &result);
+	bignum_signed_assign(&num, &result);
+
+	output = bignum_signed_to_int(&result);
+	bignum_signed_to_string(&result, buf, sizeof(buf));
+	printf("sub (20-50) result: %s (%i)\n", buf, output);
 }
 
 void print_bf(struct bf* n){
