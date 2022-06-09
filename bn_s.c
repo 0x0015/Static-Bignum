@@ -17,8 +17,16 @@ void bignum_signed_from_int(struct bn_s* n, int64_t value){
 		value_abs = -value_abs;
 		sign = 1;
 	}
-	bignum_from_int(&n->value, value_abs);
+	bignum_from_int(&n->value, (uint64_t)value_abs);
 	n->sign = sign;
+}
+
+int64_t bignum_signed_to_int(struct bn_s* n){
+	int64_t output = bignum_to_int(&n->value);
+	if(n->sign != 0){
+		output = -output;
+	} 
+	return(output);
 }
 
 void bignum_signed_add(struct bn_s* a, struct bn_s* b, struct bn_s* c){
@@ -127,3 +135,48 @@ int bignum_signed_is_zero(struct bn_s* n){
 int bignum_signed_is_negative(struct bn_s* n){
 	return(n->sign == 1);
 }
+
+void bignum_signed_inc(struct bn_s* n){
+	if(bignum_signed_is_zero(n)){
+		bignum_inc(&n->value);
+		n->sign = 1;
+		return;
+	}else{
+		if(n->sign != 0){
+			bignum_dec(&n->value);
+		}else{
+			bignum_inc(&n->value);
+		}
+	}
+}
+
+
+void bignum_signed_dec(struct bn_s* n){
+	if(bignum_signed_is_zero(n)){
+		bignum_inc(&n->value);
+		n->sign = 0;
+		return;
+	}else{
+		if(n->sign != 0){
+			bignum_inc(&n->value);
+		}else{
+			bignum_dec(&n->value);
+		}
+	}
+
+}
+
+#ifndef BN_NO_STDIO
+void bignum_signed_to_string(struct bn_s* n, char* str, int maxsize){
+	if(n->sign == 0){
+		bignum_to_string(&n->value, str, maxsize);
+		return;
+	}
+	//the number is negative
+	if(maxsize < 1){
+		return;
+	}
+	str[0] = '-';
+	bignum_to_string(&n->value, str+1, maxsize-2);//must have an even number of bytes
+}
+#endif

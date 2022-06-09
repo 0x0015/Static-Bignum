@@ -18,7 +18,9 @@ There may well be room for performance-optimizations and improvements.
 
 */
 
+#ifndef BN_NO_STDIO
 #include <stdio.h>
+#endif
 #include <stdbool.h>
 #include <assert.h>
 #include "bn.h"
@@ -94,7 +96,7 @@ int bignum_to_int(struct bn* n)
   return ret;
 }
 
-
+#ifndef BN_NO_STDIO
 void bignum_from_string(struct bn* n, char* str, int nbytes)
 {
   require(n, "n is null");
@@ -156,6 +158,7 @@ void bignum_to_string(struct bn* n, char* str, int nbytes)
   /* Zero-terminate string */
   str[i] = 0;
 }
+#endif
 
 
 void bignum_dec(struct bn* n)

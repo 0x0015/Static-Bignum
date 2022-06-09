@@ -20,7 +20,26 @@ There may well be room for performance-optimizations and improvements.
 
 */
 
+/*Uncomment line below if stdint shouldn't be included (eg. opencl)*/
+//#define BN_NO_STDINT
+
+/*Uncomment line below if stdio shouldn't be included (disables to/from string operations)*/
+//#define BN_NO_STDIO
+
+#ifndef BN_USE_STDINT
 #include <stdint.h>
+#else
+typedef char int8_t;
+typedef short int16_t;
+typedef int int32_t;
+typedef long int64_t;
+
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long uint64_t;
+#endif
+
 #include <assert.h>
 
 #define BN_BYTES 128 //must be divisable by the word size
@@ -91,8 +110,11 @@ enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 void bignum_init(struct bn* n);
 void bignum_from_int(struct bn* n, DTYPE_TMP i);
 int  bignum_to_int(struct bn* n);
+
+#ifndef BN_NO_STDIO
 void bignum_from_string(struct bn* n, char* str, int nbytes);
 void bignum_to_string(struct bn* n, char* str, int maxsize);
+#endif
 
 /* Basic arithmetic operations: */
 void bignum_add(struct bn* a, struct bn* b, struct bn* c); /* c = a + b */

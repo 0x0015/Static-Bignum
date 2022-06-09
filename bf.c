@@ -17,7 +17,7 @@ void bigfloat_from_int(struct bf* n, int64_t value){
 	bigfloat_normalize(n);
 }
 
-/*
+
 typedef union {
   double f;
   struct {
@@ -32,18 +32,19 @@ void bigfloat_from_double(struct bf* n, double d){
 	d1.f = d;
 	uint64_t mantissa = d1.parts.mantisa;
 	int64_t exponent = d1.parts.exponent;
-	bignum_from_int(&n->exponent, exponent);
-	bignum_from_int(&n->mantissa, mantissa);
-	n->mantissa_sign = d1.parts.sign;
-	if(exponent < 0){
-		n->exponent_sign = 1;
+	int64_t mantissa_s;
+	if(d1.parts.sign != 0){
+		mantissa_s = -((int)mantissa);
 	}else{
-		n->exponent_sign = 0;
+		mantissa_s = (int)mantissa;
 	}
+	bignum_signed_from_int(&n->exponent, exponent);
+	bignum_signed_from_int(&n->mantissa, mantissa);
 	bigfloat_normalize(n);
 }
 
 double bigfloat_to_double(struct bf* n){
+	/*
 	float_cast d1;
 	struct bf tmp;
 	bigfloat_assign(&tmp, n);
@@ -57,8 +58,10 @@ double bigfloat_to_double(struct bf* n){
 	d1.parts.exponent = exponent;
 	d1.parts.mantisa = mantissa;
 	return(d1.f);
+	*/
+	return 0;
 }
-*/
+
 
 //based off of https://en.wikipedia.org/wiki/Floating-point_arithmetic#Floating-point_operations
 
@@ -142,32 +145,39 @@ void bf_shiftEXP(struct bf* n, int shift){
 	}
 	if(shift > 0){
 		struct bn s_tmp;
-		bignum_rshift(&n->mantissa.value, &s_tmp, shift);
+		bignum_lshift(&n->mantissa.value, &s_tmp, shift);
 		bignum_assign(&n->mantissa.value, &s_tmp);
 		struct bn_s e_tmp;
 		struct bn_s i_tmp;
 		bignum_signed_from_int(&i_tmp, shift);
 		bignum_signed_add(&n->exponent, &i_tmp, &e_tmp);
-		bignum_signed_assign(&e_tmp, &n->exponent);
+		bignum_signed_assign(&n->exponent, &e_tmp);
 	}else{
 		//shift < 0
 		int bshift = -shift;
 		struct bn s_tmp;
-		bignum_lshift(&n->mantissa.value, &s_tmp, bshift);
+		bignum_rshift(&n->mantissa.value, &s_tmp, bshift);
 		bignum_assign(&n->mantissa.value, &s_tmp);
 		struct bn_s e_tmp;
 		struct bn_s i_tmp;
 		bignum_signed_from_int(&i_tmp, shift);
 		bignum_signed_add(&n->exponent, &i_tmp, &e_tmp);
-		bignum_signed_assign(&e_tmp, &n->exponent);
+		bignum_signed_assign(&n->exponent, &e_tmp);
 	}
 }
+
+#include <stdio.h>
 
 void bigfloat_normalize(struct bf* n){
 	//should leave it so that there is one place blank in mantissa, and adjust the exponent accordingly
 	
-	unsigned int currentBSR = bignum_bsr(&n->mantissa.value);
-
+	int currentBSR = bignum_bsr(&n->mantissa.value);
+	if(currentBSR > 400)
+		printf("Encountered very large bsr: %i\n", currentBSR);
+	int wantedBLR = 1;
+	int bsrDiff = wantedBLR - currentBSR;
+	printf("Current bsr: %i, wantedBLR: %i, diff: %i\n", currentBSR, wantedBLR, bsrDiff);
+	bf_shiftEXP(n, bsrDiff);
 }
 
 /*
