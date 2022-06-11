@@ -139,6 +139,7 @@ int bigfloat_is_zero(struct bf* n){
 	return(bigfloat_cmp(n, &zero));
 }
 
+#if BF_BASE == 2
 void bf_shiftEXP(struct bf* n, int shift){
 	if(shift == 0){
 		return;
@@ -165,19 +166,68 @@ void bf_shiftEXP(struct bf* n, int shift){
 		bignum_signed_assign(&n->exponent, &e_tmp);
 	}
 }
+unsigned int numPlaces(struct bn* n){
+	return(bignum_bsr(n));
+}
+#else
+void bf_shiftEXP(struct bf* n, int shift){
+	if(shift == 0){
+		return;
+	}
+	struct bn_s tmp;
+	struct bn_s tmp_e;
+	struct bn tmp_m;
+	struct bn baseNum;
+	struct bn tmp2;
+	bignum_signed_from_int(&tmp, shift);
+	bignum_from_int(&baseNum, BF_BASE);
+	bignum_pow(&baseNum, &tmp.value, &tmp2);//sets tmp2 to the base times the number of shifts
+	if(shift < 0){
+		bignum_mul(&n->mantissa.value, &tmp2, &tmp_m);
+	}else{
+		bignum_div(&n->mantissa.value, &tmp2, &tmp_m);	
+	}
+	bignum_assign(&n->mantissa.value, &tmp_m);
 
-#include <stdio.h>
+
+	bignum_signed_add(&n->exponent, &tmp, &tmp_e);
+	bignum_signed_assign(&n->exponent, &tmp_e);
+}
+unsigned int numPlaces(struct bn* n){
+	unsigned int r = 0;
+	struct bn tmp;
+	struct bn baseNum;
+	bignum_assign(&tmp, n);
+	bignum_from_int(&baseNum, BF_BASE);
+	while(1){
+		int result = bignum_is_zero(&tmp);
+		if(!result){
+			struct bn n_tmp;
+			bignum_assign(&n_tmp, &tmp);
+			bignum_div(&n_tmp, &baseNum, &tmp);
+			r++;
+		}else{
+			break;
+		}
+	}
+	return(r);
+}
+#endif
+
+void bigfloat_change_exponent(struct bf* n, int wantedDigits){
+	struct bn max;
+	bignum_init(&max);
+	bignum_dec(&max);
+	int maxDigits = numPlaces(&max);
+	int currentNumDigits = numPlaces(&n->mantissa.value);
+	int digDiff = -(maxDigits - wantedDigits - currentNumDigits);
+	//printf("current digits: %i, changing by %i\n", currentNumDigits, digDiff);
+	bf_shiftEXP(n, digDiff);
+}
 
 void bigfloat_normalize(struct bf* n){
 	//should leave it so that there is one place blank in mantissa, and adjust the exponent accordingly
-	
-	int currentBSR = bignum_bsr(&n->mantissa.value);
-	if(currentBSR > 400)
-		printf("Encountered very large bsr: %i\n", currentBSR);
-	int wantedBLR = 1;
-	int bsrDiff = wantedBLR - currentBSR;
-	printf("Current bsr: %i, wantedBLR: %i, diff: %i\n", currentBSR, wantedBLR, bsrDiff);
-	bf_shiftEXP(n, bsrDiff);
+	bigfloat_change_exponent(n, 1);
 }
 
 /*

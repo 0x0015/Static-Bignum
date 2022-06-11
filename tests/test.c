@@ -19,10 +19,11 @@ void bigint_test(){
 	bignum_to_string(&result, buf, sizeof(buf));
 	printf("mul result: %s (%i)\n", buf, output);
 
-	bignum_from_int(&num, -1);
+	bignum_from_int(&num, 0);
+	bignum_dec(&num);
 	bignum_from_int(&tmp, 100);
 	//bignum_div(&num, &tmp, &result);
-	bignum_assign(&num, &result);
+	bignum_assign(&result, &num);
 
 	output = bignum_to_int(&result);
 	bignum_to_string(&result, buf, sizeof(buf));
@@ -78,15 +79,15 @@ void bigsigned_test(){
 	printf("sub (20-50) result: %s (%i)\n", buf, output);
 }
 
-void print_bf(struct bf* n){
+void print_bf(struct bf* n, const char* name){
 	char buf1[1024];
 	char buf2[1024];
-	uint64_t mi = bignum_to_int(&n->mantissa.value);
-	uint64_t ei = bignum_to_int(&n->exponent.value);
-	bignum_to_string(&n->mantissa.value, buf1, sizeof(buf1));
-	bignum_to_string(&n->exponent.value, buf2, sizeof(buf2));
+	int64_t mi = bignum_signed_to_int(&n->mantissa);
+	int64_t ei = bignum_signed_to_int(&n->exponent);
+	bignum_signed_to_string(&n->mantissa, buf1, sizeof(buf1));
+	bignum_signed_to_string(&n->exponent, buf2, sizeof(buf2));
 
-	printf("result: mantissa: %s (%lu), exponent: %s (%lu)\n", buf1, mi, buf2, ei);
+	printf("%s: result: mantissa: %s (%li), exponent: %s (%li)\n", name, buf1, mi, buf2, ei);
 }
 
 void bigfloat_test(){
@@ -97,18 +98,19 @@ void bigfloat_test(){
 	struct bf result;
 
 	bigfloat_from_int(&a, 100);
-	print_bf(&a);
-	//bigfloat_from_int(&b, 2000);
-	bigfloat_from_double(&b, 0.5);
-	bigfloat_from_double(&c, 2);
+	print_bf(&a, "original a");
+	bigfloat_from_int(&b, 2000);
+	print_bf(&b, "original b");
+	//bigfloat_from_double(&b, 0.5);
+	bigfloat_from_int(&c, 2);
 	bigfloat_mul(&a, &b, &result);
 	bigfloat_assign(&a, &result);
 	bigfloat_mul(&a, &c, &result);
 	//bigfloat_assign(&result, &a);
-	print_bf(&a);
-	print_bf(&b);
-	print_bf(&c);
-	print_bf(&result);
+	print_bf(&a, "a");
+	print_bf(&b, "b");
+	print_bf(&c, "c");
+	print_bf(&result, "result");
 }
 
 int main(){
