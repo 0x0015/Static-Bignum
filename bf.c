@@ -238,7 +238,7 @@ int bf_get_maxDigits(){
 //	int maxDigits = numPlaces(&max);
 //	int result1 = maxDigits;
 
-    double log2 = 0.301029995664;
+    double log2 = 0.30102999566398119521373889472449302676818988146210854131042746112710818927;
     double size = 8 * BN_BYTES;
     double result = log2 * size;
     int result2 = ((int)result) + 1;

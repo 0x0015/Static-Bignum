@@ -40,7 +40,11 @@ typedef unsigned int uint32_t;
 typedef unsigned long uint64_t;
 #endif
 
+#ifndef BN_USE_ASSERT
 #include <assert.h>
+#else
+#define assert(a) 
+#endif
 
 #define BN_BYTES 128 //must be divisable by the word size
 
@@ -100,6 +104,7 @@ typedef struct bn
 } bn;
 
 #define bn_zero ((bn){0})
+#define bn_max ((bn){{[0 ... BN_ARRAY_SIZE-1] = MAX_VAL}})
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
