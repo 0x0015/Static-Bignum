@@ -94,13 +94,14 @@ typedef unsigned long uint64_t;
 
 
 /* Data-holding structure: array of DTYPEs */
-struct bn
+typedef struct bn
 {
   DTYPE array[BN_ARRAY_SIZE];
-};
+} bn;
 
 //extern const struct bn bn_zero;
-#define bn_zero (struct bn{{0}})
+#define bn_zero ((bn){0})
+//const bn bn_zero = {0};
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
