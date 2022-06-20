@@ -3,12 +3,12 @@
 
 #include "bn.h"
 
-struct bn_s{
+typedef struct bn_s{
 	uint8_t sign;
 	struct bn value;
-};
+}bn_s;
 
-extern const struct bn_s bn_s_zero;
+#define bn_s_zero {.sign=0, .value=bn_zero}
 
 void bignum_signed_init(struct bn_s* n);
 void bignum_signed_from_bn(struct bn_s* n, struct bn* bigint);
