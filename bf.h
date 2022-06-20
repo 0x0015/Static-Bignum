@@ -14,6 +14,8 @@ struct bf{
 
 void bigfloat_init(struct bf* n);
 void bigfloat_from_bn(struct bf* n, struct bn* bigint);
+void bigfloat_from_bn_s(struct bf* n, struct bn_s* bigint);
+void to_bignum_signed(struct bn_s* dst, struct bf* n);
 
 void bigfloat_from_double(struct bf* n, double d);
 double bigfloat_to_double(struct bf* n);

@@ -91,26 +91,27 @@ void print_bf(struct bf* n, const char* name){
 }
 
 void bigfloat_test(){
-	printf("Bigint test:\n");
+	printf("Bigfloat test:\n");
 	struct bf a;
 	struct bf b;
-	struct bf c;
-	struct bf result;
+	struct bf result1;
+	struct bf result2;
 
 	bigfloat_from_int(&a, 100);
 	print_bf(&a, "original a");
 	bigfloat_from_int(&b, 2000);
 	print_bf(&b, "original b");
 	//bigfloat_from_double(&b, 0.5);
-	bigfloat_from_int(&c, 2);
-	bigfloat_mul(&a, &b, &result);
-	bigfloat_assign(&a, &result);
-	bigfloat_mul(&a, &c, &result);
+	//bigfloat_from_int(&c, 2);
+	bigfloat_mul(&a, &b, &result1);
+	bigfloat_add(&a, &b, &result2);
+	//bigfloat_assign(&a, &result);
+	//bigfloat_mul(&a, &c, &result);
 	//bigfloat_assign(&result, &a);
 	print_bf(&a, "a");
 	print_bf(&b, "b");
-	print_bf(&c, "c");
-	print_bf(&result, "result");
+	print_bf(&result1, "result 1");
+	print_bf(&result2, "result 2");
 }
 
 int main(){

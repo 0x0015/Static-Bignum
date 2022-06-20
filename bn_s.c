@@ -77,7 +77,11 @@ void bignum_signed_add(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 void bignum_signed_sub(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 	struct bn_s tmp;
 	bignum_assign(&tmp.value, &b->value);
-	tmp.sign = 1;
+	if(b->sign == 0){
+		tmp.sign = 1;
+	}else{
+		tmp.sign = 0;
+	}
 	bignum_signed_add(a, &tmp, c);
 }
 

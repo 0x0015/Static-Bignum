@@ -1,5 +1,10 @@
 #include "bf.h"
 
+void bigfloat_change_exponent(struct bf* n, int wantedDigits);
+int bf_get_maxDigits();
+void bf_shiftEXP(struct bf* n, int shift);
+unsigned int numPlaces(struct bn* n);
+
 void bigfloat_init(struct bf* n){
 	bignum_signed_init(&n->exponent);
 	bignum_signed_init(&n->mantissa);
@@ -7,6 +12,12 @@ void bigfloat_init(struct bf* n){
 
 void bigfloat_from_bn(struct bf* n, struct bn* bigint){
 	bignum_signed_from_bn(&n->mantissa, bigint);
+	bignum_signed_from_int(&n->exponent, 0);
+	bigfloat_normalize(n);
+}
+
+void bigfloat_from_bn_s(struct bf* n, struct bn_s* bigint_signed){
+	bignum_signed_assign(&n->mantissa, bigint_signed);
 	bignum_signed_from_int(&n->exponent, 0);
 	bigfloat_normalize(n);
 }
@@ -65,56 +76,63 @@ double bigfloat_to_double(struct bf* n){
 
 //based off of https://en.wikipedia.org/wiki/Floating-point_arithmetic#Floating-point_operations
 
-void bigfloat_add_exp_same(struct bn_s* mt1, struct bn_s* bt2, struct bn_s* exp, struct bf* c){
-	//the exponent is the same so the mantissa just needs to be added.  this is more complicated than it seems because we need to worry about overflow (eg 10+10 = 100 -> 10*10^0+10*10^0=10*10^1).
-}
-
 void bigfloat_add(struct bf* a, struct bf* b, struct bf* c){
-	/*
 	int expdif = bignum_signed_cmp(&a->exponent, &b->exponent);
 	switch(expdif){
 		case EQUAL:{
+				   //printf("add, equal\n");
 				   //just add the mantissa
-				   bigfloat_add_exp_same(&a->mantissa, &b->mantissa, &a->exponent, c);
+				   bignum_signed_add(&a->mantissa, &b->mantissa, &c->mantissa);
+				   bignum_signed_assign(&c->exponent, &a->exponent);
+				   bigfloat_normalize(c);
 				   return;
 			   }
 		case LARGER:{
+				    //printf("add, larger\n");
 				    //need to shift b down
-				    struct bn tmp_e;
-				    struct bn tmp_m;
-				    //struct bn tmp;
-				    bignum_sub(&a->exponent, &b->exponent, &tmp_e);
-				    //bignum_from_int(&tmp, BF_BASE);
-				    //bignum_div(&b->mantissa, &tmp, &tmp_m);//mantissa should now be shifted so that the exponents match
-				     int shift_bits = bignum_to_int(&tmp_e);
-				     bignum_rshift(&b->mantissa, &tmp_m, shift_bits);
-				    bigfloat_add_exp_same(&a->mantissa, &tmp_m, &a->exponent, c);
+				    struct bf tmp;
+				    struct bn_s exp_diff;
+				    bignum_signed_sub(&a->exponent, &b->exponent, &exp_diff);
+				    //TODO: check to make sure exp_diff can be stored in a uint64_t
+				    uint64_t diff = bignum_to_int(&exp_diff.value);
+				    bigfloat_assign(&tmp, b);
+				    bf_shiftEXP(&tmp, diff);
+				    bignum_signed_add(&a->mantissa, &tmp.mantissa, &c->mantissa);
+				    bignum_signed_assign(&c->exponent, &a->exponent);
+				    bigfloat_normalize(c);
 				    return;
 			    }
 		case SMALLER:{
+				     //printf("add, smaller\n");
 				     //need to shift a down
-				     struct bn tmp_e;
-				     struct bn tmp_m;
-				     //struct bn tmp;
-				     bignum_sub(&b->exponent, &a->exponent, &tmp_e);
-				     //bignum_from_int(&tmp, BF_BASE);
-				     //bignum_div(&a->mantissa, &tmp, &tmp_m);//mantissa should now be shifted so that the exponents match
-				     int shift_bits = bignum_to_int(&tmp_e);
-				     bignum_rshift(&a->mantissa, &tmp_m, shift_bits);
-				     bigfloat_add_exp_same(&b->mantissa, &tmp_m, &b->exponent, c);
+				     struct bn_s exp_diff;
+				     struct bf tmp;
+				     bignum_signed_sub(&b->exponent, &a->exponent, &exp_diff);
+				     //TODO: check to make sure exp_diff can be stored in a uint64_t
+				     uint64_t diff = bignum_to_int(&exp_diff.value);
+				     bigfloat_assign(&tmp, a);
+				     //printf("Exp diff: %lu\n", diff);
+				     bf_shiftEXP(&tmp, diff);
+				     bignum_signed_add(&tmp.mantissa, &b->mantissa, &c->mantissa);
+				     bignum_signed_assign(&c->exponent, &b->exponent);
+				     bigfloat_normalize(c);
 				     return;
-				     
 			    }
-			break;
 	}
-	*/
-	//this will all get fixed once normalization is in place
 }
 
 void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c){
 	//check the sign, and if one is negative subtract that one
-	bignum_signed_add(&a->exponent, &b->exponent, &c->exponent);
-	bignum_signed_mul(&a->mantissa, &b->mantissa, &c->mantissa);
+	struct bf atmp;
+	struct bf btmp;
+	bigfloat_assign(&atmp, a);
+	bigfloat_assign(&btmp, b);
+	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
+	int maxDigits = bf_get_maxDigits();
+	bigfloat_change_exponent(&atmp, maxDigits/2 + 1);
+	bigfloat_change_exponent(&btmp, maxDigits/2 + 1);
+	bignum_signed_add(&atmp.exponent, &btmp.exponent, &c->exponent);
+	bignum_signed_mul(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 	bigfloat_normalize(c);
 }
 
@@ -134,9 +152,7 @@ void bigfloat_assign(struct bf* dst, struct bf* src){
 }
 
 int bigfloat_is_zero(struct bf* n){
-	struct bf zero;
-	bigfloat_init(&zero);
-	return(bigfloat_cmp(n, &zero));
+	return(bignum_signed_is_zero(&n->mantissa));//exponent can't change zero :/
 }
 
 #if BF_BASE == 2
@@ -214,11 +230,16 @@ unsigned int numPlaces(struct bn* n){
 }
 #endif
 
-void bigfloat_change_exponent(struct bf* n, int wantedDigits){
+int bf_get_maxDigits(){
 	struct bn max;
 	bignum_init(&max);
 	bignum_dec(&max);
 	int maxDigits = numPlaces(&max);
+	return(maxDigits);
+}
+
+void bigfloat_change_exponent(struct bf* n, int wantedDigits){
+	int maxDigits = bf_get_maxDigits();
 	int currentNumDigits = numPlaces(&n->mantissa.value);
 	int digDiff = -(maxDigits - wantedDigits - currentNumDigits);
 	//printf("current digits: %i, changing by %i\n", currentNumDigits, digDiff);
