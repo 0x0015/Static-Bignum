@@ -99,7 +99,8 @@ struct bn
   DTYPE array[BN_ARRAY_SIZE];
 };
 
-
+//extern const struct bn bn_zero;
+#define bn_zero (struct bn{{0}})
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
@@ -135,7 +136,7 @@ unsigned int bignum_bsr(struct bn* n);
 
 /* Special operators and comparison */
 int  bignum_cmp(struct bn* a, struct bn* b);               /* Compare: returns LARGER, EQUAL or SMALLER */
-int  bignum_is_zero(struct bn* n);                         /* For comparison with zero */
+int  bignum_is_zero(const struct bn* n);                         /* For comparison with zero */
 void bignum_inc(struct bn* n);                             /* Increment: add one to n */
 void bignum_dec(struct bn* n);                             /* Decrement: subtract one from n */
 void bignum_pow(struct bn* a, struct bn* b, struct bn* c); /* Calculate a^b -- e.g. 2^10 => 1024 */

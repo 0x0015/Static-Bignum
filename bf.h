@@ -12,6 +12,8 @@ struct bf{
     struct bn_s mantissa;
 };
 
+extern const struct bf bf_zero;
+
 void bigfloat_init(struct bf* n);
 void bigfloat_from_bn(struct bf* n, struct bn* bigint);
 void bigfloat_from_bn_s(struct bf* n, struct bn_s* bigint);

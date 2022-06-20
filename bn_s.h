@@ -8,6 +8,8 @@ struct bn_s{
 	struct bn value;
 };
 
+extern const struct bn_s bn_s_zero;
+
 void bignum_signed_init(struct bn_s* n);
 void bignum_signed_from_bn(struct bn_s* n, struct bn* bigint);
 void bignum_signed_from_int(struct bn_s* n, int64_t value);

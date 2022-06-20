@@ -28,6 +28,12 @@ void bigint_test(){
 	output = bignum_to_int(&result);
 	bignum_to_string(&result, buf, sizeof(buf));
 	printf("div result: %s (%i)\n", buf, output);
+
+	if(bignum_is_zero(&bn_zero)){
+		printf("bn_zero is zero\n");
+	}else{
+		printf("bn_zero is NOT zero\n");
+	}
 }
 
 void bigsigned_test(){

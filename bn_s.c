@@ -1,5 +1,7 @@
 #include "bn_s.h"
 
+const struct bn_s bn_s_zero = {0, bn_zero};
+
 void bignum_signed_init(struct bn_s* n){
 	bignum_init(&n->value);
 	n->sign = 0;

@@ -1,5 +1,7 @@
 #include "bf.h"
 
+const struct bf bf_zero = {bn_s_zero, bn_s_zero};
+
 void bigfloat_change_exponent(struct bf* n, int wantedDigits);
 int bf_get_maxDigits();
 void bf_shiftEXP(struct bf* n, int shift);

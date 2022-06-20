@@ -25,8 +25,6 @@ There may well be room for performance-optimizations and improvements.
 #include <assert.h>
 #include "bn.h"
 
-
-
 /* Functions for shifting number in-place. */
 static void _lshift_one_bit(struct bn* a);
 static void _rshift_one_bit(struct bn* a);
@@ -488,7 +486,7 @@ int bignum_cmp(struct bn* a, struct bn* b)
 }
 
 
-int bignum_is_zero(struct bn* n)
+int bignum_is_zero(const struct bn* n)
 {
   require(n, "n is null");
 
