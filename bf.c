@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "bf.h"
 
 void bigfloat_change_exponent(struct bf* n, int wantedDigits);
@@ -231,11 +232,19 @@ unsigned int numPlaces(struct bn* n){
 #endif
 
 int bf_get_maxDigits(){
-	struct bn max;
-	bignum_init(&max);
-	bignum_dec(&max);
-	int maxDigits = numPlaces(&max);
-	return(maxDigits);
+//    bn max;
+//	bignum_init(&max);
+//	bignum_dec(&max);
+//	int maxDigits = numPlaces(&max);
+//	int result1 = maxDigits;
+
+    double log2 = 0.301029995664;
+    double size = 8 * BN_BYTES;
+    double result = log2 * size;
+    int result2 = ((int)result) + 1;
+
+//    assert(result1 == result2);
+    return result2;
 }
 
 void bigfloat_change_exponent(struct bf* n, int wantedDigits){
