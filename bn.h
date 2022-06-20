@@ -99,14 +99,10 @@ typedef struct bn
   DTYPE array[BN_ARRAY_SIZE];
 } bn;
 
-//extern const struct bn bn_zero;
 #define bn_zero ((bn){0})
-//const bn bn_zero = {0};
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
-
-
 
 /* Initialization functions: */
 void bignum_init(struct bn* n);

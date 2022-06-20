@@ -7,12 +7,12 @@
 
 #define BF_BASE 10
 
-struct bf{
+typedef struct bf{
     struct bn_s exponent;
     struct bn_s mantissa;
-};
+} bf;
 
-extern const struct bf bf_zero;
+#define bf_zero ((bf){bn_zero, bn_zero})
 
 void bigfloat_init(struct bf* n);
 void bigfloat_from_bn(struct bf* n, struct bn* bigint);

@@ -8,7 +8,7 @@ typedef struct bn_s{
 	struct bn value;
 }bn_s;
 
-#define bn_s_zero {.sign=0, .value=bn_zero}
+#define bn_s_zero ((bn_s){0,bn_zero})
 
 void bignum_signed_init(struct bn_s* n);
 void bignum_signed_from_bn(struct bn_s* n, struct bn* bigint);
