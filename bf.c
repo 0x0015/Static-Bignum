@@ -168,12 +168,26 @@ void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 }
 
 int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
-	int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
-	if(exp_r == EQUAL){
-		int man_r = bignum_signed_cmp(&a->mantissa, &b->mantissa);
-		return(man_r);
+	if(bigfloat_is_zero(a)){
+		if(bigfloat_is_zero(b)){
+			return(EQUAL);
+		}else{
+			return(bignum_signed_cmp(&a->mantissa, &b->mantissa));
+		}
+	}else if(bigfloat_is_zero(b)){
+		if(bigfloat_is_zero(a)){
+			return(EQUAL);
+		}else{
+			return(bignum_signed_cmp(&a->mantissa, &b->mantissa));
+		}
 	}else{
-		return exp_r;
+		int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
+		if(exp_r == EQUAL){
+			int man_r = bignum_signed_cmp(&a->mantissa, &b->mantissa);
+			return(man_r);
+		}else{
+			return exp_r;
+		}
 	}
 }
 
