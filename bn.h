@@ -104,7 +104,7 @@ typedef struct bn
 } bn;
 
 #define bn_zero ((bn){0})
-#define bn_max ((bn){{[0 ... BN_ARRAY_SIZE-1] = MAX_VAL}})
+//#define bn_max ((bn){{[0 ... BN_ARRAY_SIZE-1] = MAX_VAL}})
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
