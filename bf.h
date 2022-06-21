@@ -24,7 +24,9 @@ void to_bignum_signed(struct bn_s* dst, struct bf* n);
 
 void bigfloat_from_int(struct bf* n, int64_t value);
 void bigfloat_add(struct bf* a, struct bf* b, struct bf* c);
+void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c);
 void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c);
+void bigfloat_div(struct bf* a, struct bf* b, struct bf* c);
 int bigfloat_cmp(struct bf* a, struct bf* b);
 void bigfloat_assign(struct bf* dst, struct bf* src);
 int bigfloat_is_zero(struct bf* n);

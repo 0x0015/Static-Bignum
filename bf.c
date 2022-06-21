@@ -121,6 +121,17 @@ void bigfloat_add(struct bf* a, struct bf* b, struct bf* c){
 	}
 }
 
+void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c){
+	struct bf tmp;
+	bigfloat_assign(&tmp, b);
+	if(tmp.mantissa.sign == 0){
+		tmp.mantissa.sign = 1;
+	}else{
+		tmp.mantissa.sign = 0;
+	}
+	bigfloat_add(a, &tmp, c);
+}
+
 void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c){
 	//check the sign, and if one is negative subtract that one
 	struct bf atmp;
@@ -133,6 +144,21 @@ void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c){
 	bigfloat_change_exponent(&btmp, maxDigits/2 + 1);
 	bignum_signed_add(&atmp.exponent, &btmp.exponent, &c->exponent);
 	bignum_signed_mul(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
+	bigfloat_normalize(c);
+}
+
+void bigfloat_div(struct bf* a, struct bf* b, struct bf* c){
+	//check the sign, and if one is negative subtract that one
+	struct bf atmp;
+	struct bf btmp;
+	bigfloat_assign(&atmp, a);
+	bigfloat_assign(&btmp, b);
+	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
+	int maxDigits = bf_get_maxDigits();
+	bigfloat_change_exponent(&atmp, maxDigits/2 + 1);
+	bigfloat_change_exponent(&btmp, maxDigits/2 + 1);
+	bignum_signed_sub(&atmp.exponent, &btmp.exponent, &c->exponent);//add & mul -> sub & div
+	bignum_signed_div(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 	bigfloat_normalize(c);
 }
 
