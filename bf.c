@@ -148,6 +148,11 @@ void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 }
 
 void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
+	if(bigfloat_is_zero(b)){
+		assert(0);
+		bigfloat_init(c);
+		return;
+	}
 	//check the sign, and if one is negative subtract that one
 	struct bf atmp;
 	struct bf btmp;
@@ -236,6 +241,9 @@ void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 	bignum_signed_assign(&n->exponent, &tmp_e);
 }
 unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
+	if(bignum_is_zero(n)){
+		return(0);
+	}
 	unsigned int r = 0;
 	struct bn tmp;
 	struct bn baseNum;

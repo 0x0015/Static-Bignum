@@ -54,7 +54,7 @@ typedef unsigned long uint64_t;
 #define assert(a) 
 #endif
 
-#define BN_BYTES 128 //must be divisable by the word size
+#define BN_BYTES 32 //must be divisable by the word size
 
 /* This macro defines the word size in bytes of the array that constitues the big-number data structure. */
 #ifndef WORD_SIZE
