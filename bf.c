@@ -1,28 +1,28 @@
 #include "bf.h"
 
-void bigfloat_change_exponent(struct bf* n, int wantedDigits);
+void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits);
 int bf_get_maxDigits();
-void bf_shiftEXP(struct bf* n, int shift);
-unsigned int numPlaces(struct bn* n);
+void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift);
+unsigned int numPlaces(BN_VAR_PREFIX struct bn* n);
 
-void bigfloat_init(struct bf* n){
+void bigfloat_init(BN_VAR_PREFIX struct bf* n){
 	bignum_signed_init(&n->exponent);
 	bignum_signed_init(&n->mantissa);
 }
 
-void bigfloat_from_bn(struct bf* n, struct bn* bigint){
+void bigfloat_from_bn(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn* bigint){
 	bignum_signed_from_bn(&n->mantissa, bigint);
 	bignum_signed_from_int(&n->exponent, 0);
 	bigfloat_normalize(n);
 }
 
-void bigfloat_from_bn_s(struct bf* n, struct bn_s* bigint_signed){
+void bigfloat_from_bn_s(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn_s* bigint_signed){
 	bignum_signed_assign(&n->mantissa, bigint_signed);
 	bignum_signed_from_int(&n->exponent, 0);
 	bigfloat_normalize(n);
 }
 
-void bigfloat_from_int(struct bf* n, int64_t value){
+void bigfloat_from_int(BN_VAR_PREFIX struct bf* n, int64_t value){
 	bignum_signed_from_int(&n->mantissa, value);
 	bignum_signed_from_int(&n->exponent, 0);
 	bigfloat_normalize(n);
@@ -38,7 +38,7 @@ typedef union {
   } parts;
 } float_cast;
 
-void bigfloat_from_double(struct bf* n, double d){
+void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 	float_cast d1;
 	d1.f = d;
 	uint64_t mantissa = d1.parts.mantisa;
@@ -54,7 +54,7 @@ void bigfloat_from_double(struct bf* n, double d){
 	bigfloat_normalize(n);
 }
 
-double bigfloat_to_double(struct bf* n){
+double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
 	
 	float_cast d1;
 	struct bf tmp;
@@ -76,7 +76,7 @@ double bigfloat_to_double(struct bf* n){
 
 //based off of https://en.wikipedia.org/wiki/Floating-point_arithmetic#Floating-point_operations
 
-void bigfloat_add(struct bf* a, struct bf* b, struct bf* c){
+void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
 	int expdif = bignum_signed_cmp(&a->exponent, &b->exponent);
 	switch(expdif){
 		case EQUAL:{
@@ -121,7 +121,7 @@ void bigfloat_add(struct bf* a, struct bf* b, struct bf* c){
 	}
 }
 
-void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c){
+void bigfloat_sub(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
 	struct bf tmp;
 	bigfloat_assign(&tmp, b);
 	if(tmp.mantissa.sign == 0){
@@ -132,7 +132,7 @@ void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c){
 	bigfloat_add(a, &tmp, c);
 }
 
-void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c){
+void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
 	//check the sign, and if one is negative subtract that one
 	struct bf atmp;
 	struct bf btmp;
@@ -147,7 +147,7 @@ void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c){
 	bigfloat_normalize(c);
 }
 
-void bigfloat_div(struct bf* a, struct bf* b, struct bf* c){
+void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
 	//check the sign, and if one is negative subtract that one
 	struct bf atmp;
 	struct bf btmp;
@@ -162,7 +162,7 @@ void bigfloat_div(struct bf* a, struct bf* b, struct bf* c){
 	bigfloat_normalize(c);
 }
 
-int bigfloat_cmp(struct bf* a, struct bf* b){
+int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
 	int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
 	if(exp_r == EQUAL){
 		int man_r = bignum_signed_cmp(&a->mantissa, &b->mantissa);
@@ -172,17 +172,17 @@ int bigfloat_cmp(struct bf* a, struct bf* b){
 	}
 }
 
-void bigfloat_assign(struct bf* dst, struct bf* src){
+void bigfloat_assign(BN_VAR_PREFIX struct bf* dst, BN_VAR_PREFIX struct bf* src){
 	bignum_signed_assign(&dst->exponent, &src->exponent);
 	bignum_signed_assign(&dst->mantissa, &src->mantissa);
 }
 
-int bigfloat_is_zero(struct bf* n){
+int bigfloat_is_zero(BN_VAR_PREFIX struct bf* n){
 	return(bignum_signed_is_zero(&n->mantissa));//exponent can't change zero :/
 }
 
 #if BF_BASE == 2
-void bf_shiftEXP(struct bf* n, int shift){
+void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 	if(shift == 0){
 		return;
 	}
@@ -208,11 +208,11 @@ void bf_shiftEXP(struct bf* n, int shift){
 		bignum_signed_assign(&n->exponent, &e_tmp);
 	}
 }
-unsigned int numPlaces(struct bn* n){
+unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
 	return(bignum_bsr(n));
 }
 #else
-void bf_shiftEXP(struct bf* n, int shift){
+void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 	if(shift == 0){
 		return;
 	}
@@ -235,7 +235,7 @@ void bf_shiftEXP(struct bf* n, int shift){
 	bignum_signed_add(&n->exponent, &tmp, &tmp_e);
 	bignum_signed_assign(&n->exponent, &tmp_e);
 }
-unsigned int numPlaces(struct bn* n){
+unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
 	unsigned int r = 0;
 	struct bn tmp;
 	struct bn baseNum;
@@ -272,7 +272,7 @@ int bf_get_maxDigits(){
     return result2;
 }
 
-void bigfloat_change_exponent(struct bf* n, int wantedDigits){
+void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits){
 	int maxDigits = bf_get_maxDigits();
 	int currentNumDigits = numPlaces(&n->mantissa.value);
 	int digDiff = -(maxDigits - wantedDigits - currentNumDigits);
@@ -280,18 +280,18 @@ void bigfloat_change_exponent(struct bf* n, int wantedDigits){
 	bf_shiftEXP(n, digDiff);
 }
 
-void bigfloat_normalize(struct bf* n){
+void bigfloat_normalize(BN_VAR_PREFIX struct bf* n){
 	//should leave it so that there is one place blank in mantissa, and adjust the exponent accordingly
 	bigfloat_change_exponent(n, 1);
 }
 
 
-void bigfloat_inc(struct bf* n){
+void bigfloat_inc(BN_VAR_PREFIX struct bf* n){
 	bignum_signed_inc(&n->mantissa);
 	bigfloat_normalize(n);
 }
 
-void bigfloat_dec(struct bf* n){
+void bigfloat_dec(BN_VAR_PREFIX struct bf* n){
 	bignum_signed_dec(&n->mantissa);
 	bigfloat_normalize(n);
 }

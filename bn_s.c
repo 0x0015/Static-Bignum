@@ -1,18 +1,16 @@
 #include "bn_s.h"
 
-
-
-void bignum_signed_init(struct bn_s* n){
+void bignum_signed_init(BN_VAR_PREFIX struct bn_s* n){
 	bignum_init(&n->value);
 	n->sign = 0;
 }
 
-void bignum_signed_from_bn(struct bn_s* n, struct bn* bigint){
+void bignum_signed_from_bn(BN_VAR_PREFIX struct bn_s* n, BN_VAR_PREFIX struct bn* bigint){
 	bignum_assign(&n->value, bigint);
 	n->sign = 0;
 }
 
-void bignum_signed_from_int(struct bn_s* n, int64_t value){
+void bignum_signed_from_int(BN_VAR_PREFIX struct bn_s* n, int64_t value){
 	int64_t value_abs = value;
 	uint8_t sign = 0;
 	if(value_abs < 0){
@@ -23,7 +21,7 @@ void bignum_signed_from_int(struct bn_s* n, int64_t value){
 	n->sign = sign;
 }
 
-int64_t bignum_signed_to_int(struct bn_s* n){
+int64_t bignum_signed_to_int(BN_VAR_PREFIX struct bn_s* n){
 	int64_t output = bignum_to_int(&n->value);
 	if(n->sign != 0){
 		output = -output;
@@ -31,7 +29,7 @@ int64_t bignum_signed_to_int(struct bn_s* n){
 	return(output);
 }
 
-void bignum_signed_add(struct bn_s* a, struct bn_s* b, struct bn_s* c){
+void bignum_signed_add(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b, BN_VAR_PREFIX struct bn_s* c){
 	if(a->sign == b->sign){
 		bignum_add(&a->value, &b->value, &c->value);
 		c->sign = a->sign;
@@ -76,7 +74,7 @@ void bignum_signed_add(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 	}	
 }
 
-void bignum_signed_sub(struct bn_s* a, struct bn_s* b, struct bn_s* c){
+void bignum_signed_sub(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b, BN_VAR_PREFIX struct bn_s* c){
 	struct bn_s tmp;
 	bignum_assign(&tmp.value, &b->value);
 	if(b->sign == 0){
@@ -88,7 +86,7 @@ void bignum_signed_sub(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 }
 
 
-void bignum_signed_mul(struct bn_s* a, struct bn_s* b, struct bn_s* c){
+void bignum_signed_mul(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b, BN_VAR_PREFIX struct bn_s* c){
 	if(a->sign == b->sign){
 		c->sign = 0;
 		bignum_mul(&a->value, &b->value, &c->value);
@@ -99,7 +97,7 @@ void bignum_signed_mul(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 }
 
 
-void bignum_signed_div(struct bn_s* a, struct bn_s* b, struct bn_s* c){
+void bignum_signed_div(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b, BN_VAR_PREFIX struct bn_s* c){
 	if(a->sign == b->sign){
 		c->sign = 0;
 		bignum_div(&a->value, &b->value, &c->value);
@@ -109,7 +107,7 @@ void bignum_signed_div(struct bn_s* a, struct bn_s* b, struct bn_s* c){
 	}
 }
 
-int bignum_signed_cmp(struct bn_s* a, struct bn_s* b){
+int bignum_signed_cmp(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b){
 	if(!a->sign && !b->sign){
 		return(bignum_cmp(&a->value, &b->value));
 	}else if(!a->sign && b->sign){
@@ -129,20 +127,20 @@ int bignum_signed_cmp(struct bn_s* a, struct bn_s* b){
 	}
 }
 
-void bignum_signed_assign(struct bn_s* dst, struct bn_s* src){
+void bignum_signed_assign(BN_VAR_PREFIX struct bn_s* dst, BN_VAR_PREFIX struct bn_s* src){
 	bignum_assign(&dst->value, &src->value);
 	dst->sign = src->sign;
 }
 
-int bignum_signed_is_zero(struct bn_s* n){
+int bignum_signed_is_zero(BN_VAR_PREFIX struct bn_s* n){
 	return(bignum_is_zero(&n->value));
 }
 
-int bignum_signed_is_negative(struct bn_s* n){
+int bignum_signed_is_negative(BN_VAR_PREFIX struct bn_s* n){
 	return(n->sign == 1);
 }
 
-void bignum_signed_inc(struct bn_s* n){
+void bignum_signed_inc(BN_VAR_PREFIX struct bn_s* n){
 	if(bignum_signed_is_zero(n)){
 		bignum_inc(&n->value);
 		n->sign = 1;
@@ -157,7 +155,7 @@ void bignum_signed_inc(struct bn_s* n){
 }
 
 
-void bignum_signed_dec(struct bn_s* n){
+void bignum_signed_dec(BN_VAR_PREFIX struct bn_s* n){
 	if(bignum_signed_is_zero(n)){
 		bignum_inc(&n->value);
 		n->sign = 0;
@@ -173,7 +171,7 @@ void bignum_signed_dec(struct bn_s* n){
 }
 
 #ifndef BN_NO_STDIO
-void bignum_signed_to_string(struct bn_s* n, char* str, int maxsize){
+void bignum_signed_to_string(BN_VAR_PREFIX struct bn_s* n, char* str, int maxsize){
 	if(n->sign == 0){
 		bignum_to_string(&n->value, str, maxsize);
 		return;

@@ -14,26 +14,26 @@ typedef struct bf{
 
 #define bf_zero ((bf){bn_zero, bn_zero})
 
-void bigfloat_init(struct bf* n);
-void bigfloat_from_bn(struct bf* n, struct bn* bigint);
-void bigfloat_from_bn_s(struct bf* n, struct bn_s* bigint);
-void to_bignum_signed(struct bn_s* dst, struct bf* n);
+void bigfloat_init(BN_VAR_PREFIX struct bf* n);
+void bigfloat_from_bn(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn* bigint);
+void bigfloat_from_bn_s(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn_s* bigint);
+void to_bignum_signed(BN_VAR_PREFIX struct bn_s* dst, BN_VAR_PREFIX struct bf* n);
 
-//void bigfloat_from_double(struct bf* n, double d);
-//double bigfloat_to_double(struct bf* n);
+//void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d);
+//double bigfloat_to_double(BN_VAR_PREFIX struct bf* n);
 
-void bigfloat_from_int(struct bf* n, int64_t value);
-void bigfloat_add(struct bf* a, struct bf* b, struct bf* c);
-void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c);
-void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c);
-void bigfloat_div(struct bf* a, struct bf* b, struct bf* c);
-void bigfloat_inc(struct bf* n);
-void bigfloat_dec(struct bf* n);
-int bigfloat_cmp(struct bf* a, struct bf* b);
-void bigfloat_assign(struct bf* dst, struct bf* src);
-int bigfloat_is_zero(struct bf* n);
+void bigfloat_from_int(BN_VAR_PREFIX struct bf* n, int64_t value);
+void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c);
+void bigfloat_sub(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c);
+void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c);
+void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c);
+void bigfloat_inc(BN_VAR_PREFIX struct bf* n);
+void bigfloat_dec(BN_VAR_PREFIX struct bf* n);
+int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b);
+void bigfloat_assign(BN_VAR_PREFIX struct bf* dst, BN_VAR_PREFIX struct bf* src);
+int bigfloat_is_zero(BN_VAR_PREFIX struct bf* n);
 
-void bigfloat_normalize(struct bf* n);//should happen automatically, but may be useful if you are manipulating the bf type
+void bigfloat_normalize(BN_VAR_PREFIX struct bf* n);//should happen automatically, but may be useful if you are manipulating the bf type
 
 
 #endif
