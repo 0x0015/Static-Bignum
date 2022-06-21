@@ -188,6 +188,10 @@ int bigfloat_is_zero(BN_VAR_PREFIX struct bf* n){
 
 #if BF_BASE == 2
 void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
+	if(bigfloat_is_zero(n)){
+		bigfloat_init(n);
+		return;
+	}
 	if(shift == 0){
 		return;
 	}
@@ -218,6 +222,10 @@ unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
 }
 #else
 void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
+	if(bigfloat_is_zero(n)){
+		bigfloat_init(n);
+		return;
+	}
 	if(shift == 0){
 		return;
 	}
