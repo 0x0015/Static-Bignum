@@ -172,13 +172,21 @@ int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
 		if(bigfloat_is_zero(b)){
 			return(EQUAL);
 		}else{
-			return(bignum_signed_cmp(&a->mantissa, &b->mantissa));
+			if(b->mantissa.sign == 0){
+				return(SMALLER);
+			}else{
+				return(LARGER);
+			}
 		}
 	}else if(bigfloat_is_zero(b)){
 		if(bigfloat_is_zero(a)){
 			return(EQUAL);
 		}else{
-			return(bignum_signed_cmp(&a->mantissa, &b->mantissa));
+			if(a->mantissa.sign == 0){
+				return(LARGER);
+			}else{
+				return(SMALLER);
+			}
 		}
 	}else{
 		int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
