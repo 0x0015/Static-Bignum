@@ -28,7 +28,7 @@ void bigfloat_from_int(struct bf* n, int64_t value){
 	bigfloat_normalize(n);
 }
 
-
+/*
 typedef union {
   double f;
   struct {
@@ -55,7 +55,7 @@ void bigfloat_from_double(struct bf* n, double d){
 }
 
 double bigfloat_to_double(struct bf* n){
-	/*
+	
 	float_cast d1;
 	struct bf tmp;
 	bigfloat_assign(&tmp, n);
@@ -69,10 +69,10 @@ double bigfloat_to_double(struct bf* n){
 	d1.parts.exponent = exponent;
 	d1.parts.mantisa = mantissa;
 	return(d1.f);
-	*/
+	
 	return 0;
 }
-
+*/
 
 //based off of https://en.wikipedia.org/wiki/Floating-point_arithmetic#Floating-point_operations
 
