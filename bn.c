@@ -22,7 +22,9 @@ There may well be room for performance-optimizations and improvements.
 #include <stdio.h>
 #endif
 #include <stdbool.h>
+#ifndef BN_NO_ASSERT
 #include <assert.h>
+#endif
 #include "bn.h"
 
 /* Functions for shifting number in-place. */

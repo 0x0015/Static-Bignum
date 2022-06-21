@@ -26,7 +26,7 @@ There may well be room for performance-optimizations and improvements.
 /*Uncomment line below if stdio shouldn't be included (disables to/from string operations)*/
 //#define BN_NO_STDIO
 
-#ifndef BN_USE_STDINT
+#ifndef BN_NO_STDINT
 #include <stdint.h>
 #else
 typedef char int8_t;
@@ -40,7 +40,7 @@ typedef unsigned int uint32_t;
 typedef unsigned long uint64_t;
 #endif
 
-#ifndef BN_USE_ASSERT
+#ifndef BN_NO_ASSERT
 #include <assert.h>
 #else
 #define assert(a) 
