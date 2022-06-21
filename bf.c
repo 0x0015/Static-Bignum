@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "bf.h"
 
 void bigfloat_change_exponent(struct bf* n, int wantedDigits);
