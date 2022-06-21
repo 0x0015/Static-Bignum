@@ -21,7 +21,13 @@ There may well be room for performance-optimizations and improvements.
 #ifndef BN_NO_STDIO
 #include <stdio.h>
 #endif
+#ifndef BN_NO_STDBOOL
 #include <stdbool.h>
+#else
+#define bool uint8_t
+#define true 1
+#define false 0
+#endif
 #ifndef BN_NO_ASSERT
 #include <assert.h>
 #endif

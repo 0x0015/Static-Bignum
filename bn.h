@@ -26,6 +26,10 @@ There may well be room for performance-optimizations and improvements.
 /*Uncomment line below if stdio shouldn't be included (disables to/from string operations)*/
 //#define BN_NO_STDIO
 
+//#define BN_NO_ASSERT
+
+//#define BN_NO_STDBOOL
+
 #ifndef BN_NO_STDINT
 #include <stdint.h>
 #else
