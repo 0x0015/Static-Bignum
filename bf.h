@@ -27,6 +27,8 @@ void bigfloat_add(struct bf* a, struct bf* b, struct bf* c);
 void bigfloat_sub(struct bf* a, struct bf* b, struct bf* c);
 void bigfloat_mul(struct bf* a, struct bf* b, struct bf* c);
 void bigfloat_div(struct bf* a, struct bf* b, struct bf* c);
+void bigfloat_inc(struct bf* n);
+void bigfloat_dec(struct bf* n);
 int bigfloat_cmp(struct bf* a, struct bf* b);
 void bigfloat_assign(struct bf* dst, struct bf* src);
 int bigfloat_is_zero(struct bf* n);

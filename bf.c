@@ -285,9 +285,13 @@ void bigfloat_normalize(struct bf* n){
 	bigfloat_change_exponent(n, 1);
 }
 
-/*
- * TODO:
- * figure out how the normalize function should work
- * code it.
- * fix add.
- */
+
+void bigfloat_inc(struct bf* n){
+	bignum_signed_inc(&n->mantissa);
+	bigfloat_normalize(n);
+}
+
+void bigfloat_dec(struct bf* n){
+	bignum_signed_dec(&n->mantissa);
+	bigfloat_normalize(n);
+}
