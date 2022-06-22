@@ -21,8 +21,9 @@ void bignum_signed_from_int(BN_VAR_PREFIX struct bn_s* n, int64_t value){
 	n->sign = sign;
 }
 
-int64_t bignum_signed_to_int(BN_VAR_PREFIX struct bn_s* n){
-	int64_t output = bignum_to_int(&n->value);
+int32_t bignum_signed_to_int(BN_VAR_PREFIX struct bn_s* n){
+	uint32_t u_output = bignum_to_int(&n->value);
+	int64_t output = u_output;
 	if(n->sign != 0){
 		output = -output;
 	} 

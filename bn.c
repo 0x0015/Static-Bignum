@@ -80,11 +80,11 @@ void bignum_from_int(BN_VAR_PREFIX struct bn* n, DTYPE_TMP i)
 }
 
 
-int bignum_to_int(BN_VAR_PREFIX struct bn* n)
+uint32_t bignum_to_int(BN_VAR_PREFIX struct bn* n)
 {
   require(n, "n is null");
 
-  int ret = 0;
+  uint32_t ret = 0;
 
   /* Endianness issue if machine is not little-endian? */
 #if (WORD_SIZE == 1)
@@ -100,6 +100,11 @@ int bignum_to_int(BN_VAR_PREFIX struct bn* n)
 #endif
 
   return ret;
+}
+
+DTYPE bignum_to_DTYPE(BN_VAR_PREFIX struct bn* n){
+	require(n, "n is null");
+	return(n->array[0]);
 }
 
 #ifndef BN_NO_STDIO

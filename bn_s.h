@@ -13,7 +13,7 @@ typedef struct bn_s{
 void bignum_signed_init(BN_VAR_PREFIX struct bn_s* n);
 void bignum_signed_from_bn(BN_VAR_PREFIX struct bn_s* n, BN_VAR_PREFIX struct bn* bigint);
 void bignum_signed_from_int(BN_VAR_PREFIX struct bn_s* n, int64_t value);
-int64_t bignum_signed_to_int(BN_VAR_PREFIX struct bn_s* n);
+int32_t bignum_signed_to_int(BN_VAR_PREFIX struct bn_s* n);
 
 #ifndef BN_NO_STDIO
 void bignum_signed_to_string(BN_VAR_PREFIX struct bn_s* n, char* str, int maxsize);

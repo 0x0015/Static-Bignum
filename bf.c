@@ -28,51 +28,119 @@ void bigfloat_from_int(BN_VAR_PREFIX struct bf* n, int64_t value){
 	bigfloat_normalize(n);
 }
 
-/*
-typedef union {
-  double f;
-  struct {
-    uint64_t mantisa : 52;
-    int exponent : 11;
-    unsigned int sign : 1;
-  } parts;
-} float_cast;
 
-void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
-	float_cast d1;
-	d1.f = d;
-	uint64_t mantissa = d1.parts.mantisa;
-	int64_t exponent = d1.parts.exponent;
-	int64_t mantissa_s;
-	if(d1.parts.sign != 0){
-		mantissa_s = -((int)mantissa);
+#ifndef BN_NO_STDMATH
+#include <math.h>
+#else
+#ifdef BN_CUSTOM_FMATH
+//from https://stackoverflow.com/questions/70382318/ex-without-math-h
+double fabs(double x) {
+    if(x >= 0){
+        return x;
+    } else {
+        return -x;
+    }
+}
+double exp(double x) {
+    double a = 1.0, e = 0;
+    int invert = x<0;
+    x = fabs(x);
+    for (int n = 1; e != e + a ; ++n) {
+        e += a;
+        a = a * x / n;
+    }
+    return invert ? 1/e : e;
+}
+//from https://stackoverflow.com/a/64896598
+#define EULER_CONST 2.718281828459045235
+#define TAYLOR_ITERATIONS 20
+double log(double x) {
+    // Trap illegal values
+    if (x <= 0) {
+        return 0.0/0.0;  // NaN
+    }
+    
+    // Confine x to a sensible range
+    int power_adjust = 0;
+    while (x > 1.0) {
+        x /= EULER_CONST;
+        power_adjust++;
+    }
+    while (x < .25) {
+        x *= EULER_CONST;
+        power_adjust--;
+    }
+    
+    // Now use the Taylor series to calculate the logarithm
+    x -= 1.0;
+    double t = 0.0, s = 1.0, z = x;
+    for (int k=1; k<=TAYLOR_ITERATIONS; k++) {
+        t += z * s / k;
+        z *= x;
+        s = -s;
+    }
+    
+    // Combine the result with the power_adjust value and return
+    return t + power_adjust;
+}
+//from https://stackoverflow.com/a/14104864
+double pow(double x, double y) {
+    return exp(log(x)*y);
+}
+double fmax(double a, double b){
+	if(a > b){
+		return(a);
 	}else{
-		mantissa_s = (int)mantissa;
+		return(b);
 	}
-	bignum_signed_from_int(&n->exponent, exponent);
-	bignum_signed_from_int(&n->mantissa, mantissa);
+}
+#endif
+#endif
+
+#if (!defined(BN_NO_STDMATH)) || defined(BN_CUSTOM_FMATH) || defined(BN_NATIVE_FMATH)
+#define BF_EPSILON 10e-12
+int bf_closeWithinEpsilon(double d1, double d2){
+	return (fabs(d1-d2) < BF_EPSILON * fmax(fabs(d1), fabs(d2))); //epsilon is 0.1 for now
+}
+void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
+	double rd = log(d)/log(BF_BASE);//how many powers of bf_base fit in d?
+	int r = rd;
+	int er = 0;
+	if(r == 0){
+		if(d < 1 && d > 0){
+			r--;
+		}
+	}else if(r < 0){
+		r--;
+	}
+	if(bf_closeWithinEpsilon(r, rd)){
+		//printf("multiple of BF_BASE\n");
+		er--;
+	}
+	//printf("r=%i (rd=%lf)\n", r, rd);
+	double rDIV = d / pow(BF_BASE, r);
+	unsigned int rmax = log(MAX_VAL)/log(BF_BASE);
+	int64_t mres = rDIV * pow(BF_BASE, rmax);
+	unsigned int mresr = log(mres)/log(BF_BASE);
+	int64_t exp = -mresr;
+	bignum_signed_from_int(&n->mantissa, mres);
+	bignum_signed_from_int(&n->exponent, exp+r+er);
 	bigfloat_normalize(n);
 }
-
 double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
-	
-	float_cast d1;
 	struct bf tmp;
-	bigfloat_assign(&tmp, n);
-	//from here we need to shift the mantissa and add/sub to the exponent so that the mantissa just fits in a double
-	uint64_t mantissa = bignum_to_int(&tmp.mantissa);
-	int64_t exponent = bignum_to_int(&tmp.exponent);
-	if(n->exponent_sign){
-		exponent = -exponent;
-	}
-	d1.parts.sign = n->mantissa_sign;
-	d1.parts.exponent = exponent;
-	d1.parts.mantisa = mantissa;
-	return(d1.f);
-	
-	return 0;
+	bigfloat_assign(&tmp, n); 
+	unsigned int rmax = log(MAX_VAL)/log(BF_BASE);
+	bigfloat_change_exponent(&tmp, rmax);
+	int64_t man = bignum_signed_to_int(&tmp.mantissa);
+	int64_t exp = bignum_signed_to_int(&tmp.exponent);
+	unsigned int r = log(man)/log(BF_BASE);
+	//printf("man: %li, exp: %li\n", man, exp);
+	double output = man;
+	output *= pow(BF_BASE, exp);
+	return(output);
 }
-*/
+#endif
 
 //based off of https://en.wikipedia.org/wiki/Floating-point_arithmetic#Floating-point_operations
 
@@ -140,8 +208,8 @@ void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 	bigfloat_assign(&btmp, b);
 	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
 	int maxDigits = bf_get_maxDigits();
-	bigfloat_change_exponent(&atmp, maxDigits/2 + 1);
-	bigfloat_change_exponent(&btmp, maxDigits/2 + 1);
+	bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
+	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
 	bignum_signed_add(&atmp.exponent, &btmp.exponent, &c->exponent);
 	bignum_signed_mul(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 	bigfloat_normalize(c);
@@ -160,8 +228,8 @@ void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 	bigfloat_assign(&btmp, b);
 	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
 	int maxDigits = bf_get_maxDigits();
-	bigfloat_change_exponent(&atmp, maxDigits/2 + 1);
-	bigfloat_change_exponent(&btmp, maxDigits/2 + 1);
+	bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
+	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
 	bignum_signed_sub(&atmp.exponent, &btmp.exponent, &c->exponent);//add & mul -> sub & div
 	bignum_signed_div(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 	bigfloat_normalize(c);
@@ -272,7 +340,7 @@ void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 }
 unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
 	if(bignum_is_zero(n)){
-		return(0);
+		return(bf_get_maxDigits());
 	}
 	unsigned int r = 0;
 	struct bn tmp;
@@ -313,14 +381,17 @@ int bf_get_maxDigits(){
 void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits){
 	int maxDigits = bf_get_maxDigits();
 	int currentNumDigits = numPlaces(&n->mantissa.value);
-	int digDiff = -(maxDigits - wantedDigits - currentNumDigits);
-	//printf("current digits: %i, changing by %i\n", currentNumDigits, digDiff);
-	bf_shiftEXP(n, digDiff);
+	int digDiff = wantedDigits - currentNumDigits;
+	int digShift = -(digDiff);
+	//printf("current digits: %i, digShift: %i, digDiff: %i (wantedDigits=%i, maxDigits=%i)\n", currentNumDigits, digShift, digDiff, wantedDigits, maxDigits);
+	bf_shiftEXP(n, digShift);
+	int n_currentNumDigits = numPlaces(&n->mantissa.value);
+	//printf("n_currentNumDigits: %i, exp: %i\n", n_currentNumDigits, bignum_signed_to_int(&n->exponent));
 }
 
 void bigfloat_normalize(BN_VAR_PREFIX struct bf* n){
 	//should leave it so that there is one place blank in mantissa, and adjust the exponent accordingly
-	bigfloat_change_exponent(n, 1);
+	bigfloat_change_exponent(n, bf_get_maxDigits() - 1);
 }
 
 

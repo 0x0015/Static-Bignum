@@ -19,8 +19,11 @@ void bigfloat_from_bn(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn* bigin
 void bigfloat_from_bn_s(BN_VAR_PREFIX struct bf* n, BN_VAR_PREFIX struct bn_s* bigint);
 void to_bignum_signed(BN_VAR_PREFIX struct bn_s* dst, BN_VAR_PREFIX struct bf* n);
 
-//void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d);
-//double bigfloat_to_double(BN_VAR_PREFIX struct bf* n);
+//only define conversions to and from double, if it is known that there is double math implemented
+#if (!defined(BN_NO_STDMATH)) || defined(BN_CUSTOM_FMATH) || defined(BN_NATIVE_FMATH)
+void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d);
+double bigfloat_to_double(BN_VAR_PREFIX struct bf* n);
+#endif
 
 void bigfloat_from_int(BN_VAR_PREFIX struct bf* n, int64_t value);
 void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c);

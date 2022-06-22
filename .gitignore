@@ -1,3 +1,5 @@
 .idea
 tests/test
-tests/gmon.out
+tests/uint_stress
+tests/sint_stress
+tests/float_stress

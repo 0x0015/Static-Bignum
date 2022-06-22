@@ -120,7 +120,8 @@ enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 /* Initialization functions: */
 void bignum_init(BN_VAR_PREFIX struct bn* n);
 void bignum_from_int(BN_VAR_PREFIX struct bn* n, DTYPE_TMP i);
-int  bignum_to_int(BN_VAR_PREFIX struct bn* n);
+uint32_t  bignum_to_int(BN_VAR_PREFIX struct bn* n);
+DTYPE  bignum_to_DTYPE(BN_VAR_PREFIX struct bn* n);
 
 #ifndef BN_NO_STDIO
 void bignum_from_string(BN_VAR_PREFIX struct bn* n, char* str, int nbytes);
