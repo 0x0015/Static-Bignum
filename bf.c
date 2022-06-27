@@ -1,4 +1,21 @@
 #include "bf.h"
+#ifdef BF_DIAGNOSTICS
+#include <stdio.h>
+
+void bf_diagnostic_print(BN_VAR_PREFIX struct bf* n){
+	double d = bigfloat_to_double(n);
+	char buf1[1000];
+	char buf2[1000];
+	int64_t man = bignum_signed_to_int(&n->mantissa);
+	int64_t exp = bignum_signed_to_int(&n->exponent);
+	bignum_signed_to_string(&n->mantissa, buf1, 1000);
+	bignum_signed_to_string(&n->exponent, buf2, 1000);
+	printf("mantissa: %s (%li) exponent: %s (%li)   (%lf)\n", buf1, man, buf2, exp, d);
+}
+#define BF_IF_DIAGNOSTIC_INLINE(x) x
+#else
+#define BF_IF_DIAGNOSTIC_INLINE(x) 
+#endif
 
 void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits);
 int bf_get_maxDigits();
@@ -148,7 +165,7 @@ void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 	int expdif = bignum_signed_cmp(&a->exponent, &b->exponent);
 	switch(expdif){
 		case EQUAL:{
-				   //printf("add, equal\n");
+				   BF_IF_DIAGNOSTIC_INLINE(printf("add, equal\n");)
 				   //just add the mantissa
 				   bignum_signed_add(&a->mantissa, &b->mantissa, &c->mantissa);
 				   bignum_signed_assign(&c->exponent, &a->exponent);
@@ -156,7 +173,7 @@ void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 				   return;
 			   }
 		case LARGER:{
-				    //printf("add, larger\n");
+				    BF_IF_DIAGNOSTIC_INLINE(printf("add, larger\n");)
 				    //need to shift b down
 				    struct bf tmp;
 				    struct bn_s exp_diff;
@@ -165,13 +182,19 @@ void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 				    uint64_t diff = bignum_to_int(&exp_diff.value);
 				    bigfloat_assign(&tmp, b);
 				    bf_shiftEXP(&tmp, diff);
+#ifdef BF_DIAGNOSTICS
+				    printf("post shift:  ");
+				    bf_diagnostic_print(&tmp);
+				    printf("a: ");
+				    bf_diagnostic_print(a);
+#endif
 				    bignum_signed_add(&a->mantissa, &tmp.mantissa, &c->mantissa);
 				    bignum_signed_assign(&c->exponent, &a->exponent);
 				    bigfloat_normalize(c);
 				    return;
 			    }
 		case SMALLER:{
-				     //printf("add, smaller\n");
+				     BF_IF_DIAGNOSTIC_INLINE(printf("add, smaller\n");)
 				     //need to shift a down
 				     struct bn_s exp_diff;
 				     struct bf tmp;
@@ -181,6 +204,12 @@ void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 				     bigfloat_assign(&tmp, a);
 				     //printf("Exp diff: %lu\n", diff);
 				     bf_shiftEXP(&tmp, diff);
+#ifdef BF_DIAGNOSTICS
+				     printf("post shift:  ");
+				     bf_diagnostic_print(&tmp);
+				     printf("b: ");
+				     bf_diagnostic_print(b);
+#endif
 				     bignum_signed_add(&tmp.mantissa, &b->mantissa, &c->mantissa);
 				     bignum_signed_assign(&c->exponent, &b->exponent);
 				     bigfloat_normalize(c);
@@ -210,6 +239,12 @@ void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 	int maxDigits = bf_get_maxDigits();
 	bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
 	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
+#ifdef BF_DIAGNOSTICS
+	printf("a:  ");
+	bf_diagnostic_print(&atmp);
+	printf("b:  ");
+	bf_diagnostic_print(&btmp);
+#endif
 	bignum_signed_add(&atmp.exponent, &btmp.exponent, &c->exponent);
 	bignum_signed_mul(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 	bigfloat_normalize(c);
@@ -222,16 +257,26 @@ void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 		return;
 	}
 	//check the sign, and if one is negative subtract that one
-	struct bf atmp;
-	struct bf btmp;
-	bigfloat_assign(&atmp, a);
-	bigfloat_assign(&btmp, b);
-	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
-	int maxDigits = bf_get_maxDigits();
-	bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
-	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
-	bignum_signed_sub(&atmp.exponent, &btmp.exponent, &c->exponent);//add & mul -> sub & div
-	bignum_signed_div(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
+	//struct bf atmp;
+	//struct bf btmp;
+	//bigfloat_assign(&atmp, a);
+	//bigfloat_assign(&btmp, b);
+	//these are not neccesary for division, as a/b is always less digits than a (at least for intagers)
+	//int maxDigits = bf_get_maxDigits();
+	//bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
+	//bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
+#ifdef BF_DIAGNOSTICS
+	printf("a:  ");
+	bf_diagnostic_print(a);
+	printf("b:  ");
+	bf_diagnostic_print(b);
+#endif
+	bignum_signed_sub(&a->exponent, &b->exponent, &c->exponent);//add & mul -> sub & div
+	bignum_signed_div(&a->mantissa, &b->mantissa, &c->mantissa);
+#ifdef BF_DIAGNOSTICS
+	printf("pre normalization:  ");
+	bf_diagnostic_print(c);
+#endif
 	bigfloat_normalize(c);
 }
 

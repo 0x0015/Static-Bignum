@@ -110,6 +110,7 @@ void bignum_signed_div(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* 
 
 int bignum_signed_cmp(BN_VAR_PREFIX struct bn_s* a, BN_VAR_PREFIX struct bn_s* b){
 	if(!a->sign && !b->sign){
+		//both are positive
 		return(bignum_cmp(&a->value, &b->value));
 	}else if(!a->sign && b->sign){
 		return(LARGER);
