@@ -676,7 +676,27 @@ static void _rshift_one_bit(BN_VAR_PREFIX struct bn* a)
   a->array[BN_ARRAY_SIZE - 1] >>= 1;
 }
 
+//I don't know how to test this in any other way
+#if defined(__GNUC__) || defined(__builtin_clz)
+	#define BN_GNU_CLZ
+#endif
 
+#ifndef BN_CUSTOM_BSR
+	#ifdef BN_GNU_CLZ
+		#define BN_CLZ __builtin_clz
+	#else
+		#ifdef BN_CLZ_CLZ
+			#define BN_CLZ clz
+		#else
+			//no bsr is defined
+			#define BN_NO_CLZ
+		#endif
+	#endif
+#else
+	#define BN_CLZ BN_CUSTOM_BSR
+#endif
+
+#ifdef BN_NO_CLZ
 //based on the anwer from https://stackoverflow.com/questions/8991024/find-out-how-many-binary-digits-a-particular-integer-has
 unsigned int bignum_bsr(BN_VAR_PREFIX struct bn* n){
 	require(n, "n is null");
@@ -698,3 +718,21 @@ unsigned int bignum_bsr(BN_VAR_PREFIX struct bn* n){
 	}
 	return(digits);
 }
+
+#else
+
+unsigned int bignum_bsr(BN_VAR_PREFIX struct bn* n){
+	unsigned int output = 0;
+	for(unsigned int i=BN_ARRAY_SIZE-1;i>0;i--){
+		if(n->array[i] == 0){
+			output += WORD_SIZE * 8;
+		}else{
+			unsigned int secLZ = BN_CLZ(n->array[i]);
+			output += secLZ;
+			return(output);
+		}
+	}
+	return(output);
+}
+
+#endif

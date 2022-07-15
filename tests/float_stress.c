@@ -52,6 +52,10 @@ void checkConversions(){
 	bigfloat_from_int(&test, currentTest_i);
 	toutput = bigfloat_to_double(&test);
 	printf("expected: %i, got %lf\n", currentTest_i, toutput);
+	currentTest_i = 0;
+	bigfloat_from_int(&test, currentTest_i);
+	toutput = bigfloat_to_double(&test);
+	printf("expected: %i, got %lf\n", currentTest_i, toutput);
 }
 
 int main(){
@@ -60,10 +64,11 @@ int main(){
 	srand(0); //set seed for now
 	
 	//checkConversions();
+	//return 0;
 	//this seems to be working, so onto the actual test
 	
 	bf a, b, c;
-	for(unsigned int i=0;i<1000;i++){
+	for(unsigned int i=0;i<10000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua * ub;
@@ -85,7 +90,7 @@ int main(){
 			printf("Incorrect %lf * %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
-	for(unsigned int i=0;i<1000;i++){
+	for(unsigned int i=0;i<10000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua / ub;
@@ -107,7 +112,7 @@ int main(){
 			printf("Incorrect %lf / %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
-	for(unsigned int i=0;i<1000;i++){
+	for(unsigned int i=0;i<10000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua + ub;
@@ -129,7 +134,7 @@ int main(){
 			printf("Incorrect %lf + %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
-	for(unsigned int i=0;i<1000;i++){
+	for(unsigned int i=0;i<10000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua - ub;

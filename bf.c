@@ -131,10 +131,10 @@ void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 		r--;
 	}
 	if(bf_closeWithinEpsilon(r, rd)){
-		//printf("multiple of BF_BASE\n");
+		BF_IF_DIAGNOSTIC_INLINE(printf("multiple of BF_BASE\n");)
 		er--;
 	}
-	//printf("r=%i (rd=%lf)\n", r, rd);
+	BF_IF_DIAGNOSTIC_INLINE(printf("r=%i (rd=%lf)\n", r, rd);)
 	double rDIV = d / pow(BF_BASE, r);
 	unsigned int rmax = log(MAX_VAL)/log(BF_BASE);
 	int64_t mres = rDIV * pow(BF_BASE, rmax);
@@ -142,6 +142,7 @@ void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 	int64_t exp = -mresr;
 	bignum_signed_from_int(&n->mantissa, mres);
 	bignum_signed_from_int(&n->exponent, exp+r+er);
+	BF_IF_DIAGNOSTIC_INLINE(printf("man: %li, exp: %li\n", mres, exp+r+er);)
 	bigfloat_normalize(n);
 }
 double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
@@ -152,7 +153,7 @@ double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
 	int64_t man = bignum_signed_to_int(&tmp.mantissa);
 	int64_t exp = bignum_signed_to_int(&tmp.exponent);
 	unsigned int r = log(man)/log(BF_BASE);
-	//printf("man: %li, exp: %li\n", man, exp);
+	BF_IF_DIAGNOSTIC_INLINE(printf("man: %li, exp: %li\n", man, exp);)
 	double output = man;
 	output *= pow(BF_BASE, exp);
 	return(output);
@@ -342,9 +343,11 @@ void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 	if(shift == 0){
 		return;
 	}
-	if(shift > 0){
+	if(shift < 0){
+		BF_IF_DIAGNOSTIC_INLINE(printf("shift less than 0\n");)
+		int bshift = -shift;
 		struct bn s_tmp;
-		bignum_lshift(&n->mantissa.value, &s_tmp, shift);
+		bignum_lshift(&n->mantissa.value, &s_tmp, bshift);
 		bignum_assign(&n->mantissa.value, &s_tmp);
 		struct bn_s e_tmp;
 		struct bn_s i_tmp;
@@ -352,8 +355,9 @@ void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 		bignum_signed_add(&n->exponent, &i_tmp, &e_tmp);
 		bignum_signed_assign(&n->exponent, &e_tmp);
 	}else{
+		BF_IF_DIAGNOSTIC_INLINE(printf("shift greater than 0\n");)
 		//shift < 0
-		int bshift = -shift;
+		int bshift = shift;
 		struct bn s_tmp;
 		bignum_rshift(&n->mantissa.value, &s_tmp, bshift);
 		bignum_assign(&n->mantissa.value, &s_tmp);
@@ -365,7 +369,10 @@ void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
 	}
 }
 unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
-	return(bignum_bsr(n));
+	return(BN_BITS - bignum_bsr(n));
+}
+int bf_get_maxDigits(){
+	return(BN_BYTES * 8 - 1);//that was easy
 }
 #else
 void bf_shiftEXP(BN_VAR_PREFIX struct bf* n, int shift){
@@ -417,7 +424,6 @@ unsigned int numPlaces(BN_VAR_PREFIX struct bn* n){
 	}
 	return(r);
 }
-#endif
 
 int bf_get_maxDigits(){
 //    bn max;
@@ -426,7 +432,8 @@ int bf_get_maxDigits(){
 //	int maxDigits = numPlaces(&max);
 //	int result1 = maxDigits;
 
-    double log2 = 0.30102999566398119521373889472449302676818988146210854131042746112710818927;
+    //double log2 = 0.30102999566398119521373889472449302676818988146210854131042746112710818927;
+    double log2 = log(2)/log(BF_BASE);
     double size = 8 * BN_BYTES;
     double result = log2 * size;
     int result2 = ((int)result) + 1;
@@ -434,13 +441,14 @@ int bf_get_maxDigits(){
 //    assert(result1 == result2);
     return result2;
 }
+#endif
 
 void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits){
-	int maxDigits = bf_get_maxDigits();
+	//int maxDigits = bf_get_maxDigits();
 	int currentNumDigits = numPlaces(&n->mantissa.value);
 	int digDiff = wantedDigits - currentNumDigits;
 	int digShift = -(digDiff);
-	//printf("current digits: %i, digShift: %i, digDiff: %i (wantedDigits=%i, maxDigits=%i)\n", currentNumDigits, digShift, digDiff, wantedDigits, maxDigits);
+	//printf("current digits: %i, digShift: %i, digDiff: %i (wantedDigits=%i)\n", currentNumDigits, digShift, digDiff, wantedDigits);
 	bf_shiftEXP(n, digShift);
 	int n_currentNumDigits = numPlaces(&n->mantissa.value);
 	//printf("n_currentNumDigits: %i, exp: %i\n", n_currentNumDigits, bignum_signed_to_int(&n->exponent));

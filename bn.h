@@ -55,7 +55,7 @@ typedef unsigned long uint64_t;
 #endif
 
 #define BN_BYTES 32 //must be divisable by the word size
-
+#define BN_BITS (BN_BYTES*8)
 /* This macro defines the word size in bytes of the array that constitues the big-number data structure. */
 #ifndef WORD_SIZE
   #define WORD_SIZE 4

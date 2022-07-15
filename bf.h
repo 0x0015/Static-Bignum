@@ -5,7 +5,7 @@
 
 #define BF_NORMALIZATION_MANTISSA_SIZE (BN_BYTES-1)
 
-#define BF_BASE 10
+#define BF_BASE 2
 
 typedef struct bf{
     struct bn_s exponent;
