@@ -63,7 +63,7 @@ int main(){
 	//this seems to be working, so onto the actual test
 	
 	bf a, b, c;
-	for(unsigned int i=0;i<10;i++){
+	for(unsigned int i=0;i<1000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua * ub;
@@ -85,7 +85,7 @@ int main(){
 			printf("Incorrect %lf * %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
-	for(unsigned int i=0;i<10;i++){
+	for(unsigned int i=0;i<1000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua / ub;
@@ -107,8 +107,7 @@ int main(){
 			printf("Incorrect %lf / %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
-	srand(0);
-	for(unsigned int i=0;i<10;i++){
+	for(unsigned int i=0;i<1000;i++){
 		double ua = rd() * 1000; 
 		double ub = rd() * 1000; 
 		double uc = ua + ub;
@@ -128,6 +127,28 @@ int main(){
 			//printf("\tCorrect %lf + %lf = %lf (got %lf)\n", ua, ub, uc, cresult);
 		}else{
 			printf("Incorrect %lf + %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
+		}
+	}
+	for(unsigned int i=0;i<1000;i++){
+		double ua = rd() * 1000; 
+		double ub = rd() * 1000; 
+		double uc = ua - ub;
+		bigfloat_from_double(&a, ua);
+		bigfloat_from_double(&b, ub);
+		bigfloat_sub(&a, &b, &c);
+		double aresult = bigfloat_to_double(&a);
+		double bresult = bigfloat_to_double(&b);
+		double cresult = bigfloat_to_double(&c);
+		if(!closeWithinEpsilon(ua, aresult)){
+			printf("Failed to properly set a\n");
+		}
+		if(!closeWithinEpsilon(ub, bresult)){
+			printf("failed to properly set b\n");
+		}
+		if(closeWithinEpsilon(cresult, uc)){
+			//printf("\tCorrect %lf - %lf = %lf (got %lf)\n", ua, ub, uc, cresult);
+		}else{
+			printf("Incorrect %lf - %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
 	printf("floating point stress test done.\n");

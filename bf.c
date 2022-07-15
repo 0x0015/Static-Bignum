@@ -167,8 +167,20 @@ void bigfloat_add(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 		case EQUAL:{
 				   BF_IF_DIAGNOSTIC_INLINE(printf("add, equal\n");)
 				   //just add the mantissa
+#ifdef BF_DIAGNOSTICS
+				     printf("a:  ");
+				     bf_diagnostic_print(a);
+				     printf("b:  ");
+				     bf_diagnostic_print(b);
+#endif
+				   //bf_shiftEXP(a, 1);
+				   //bf_shiftEXP(b, 1);
 				   bignum_signed_add(&a->mantissa, &b->mantissa, &c->mantissa);
 				   bignum_signed_assign(&c->exponent, &a->exponent);
+#ifdef BF_DIAGNOSTICS
+				     printf("pre normalization:  ");
+				     bf_diagnostic_print(c);
+#endif
 				   bigfloat_normalize(c);
 				   return;
 			   }
@@ -240,9 +252,9 @@ void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 	bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
 	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
 #ifdef BF_DIAGNOSTICS
-	printf("a:  ");
+	printf("atmp:  ");
 	bf_diagnostic_print(&atmp);
-	printf("b:  ");
+	printf("btmp:  ");
 	bf_diagnostic_print(&btmp);
 #endif
 	bignum_signed_add(&atmp.exponent, &btmp.exponent, &c->exponent);
@@ -257,22 +269,22 @@ void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 		return;
 	}
 	//check the sign, and if one is negative subtract that one
-	//struct bf atmp;
-	//struct bf btmp;
-	//bigfloat_assign(&atmp, a);
-	//bigfloat_assign(&btmp, b);
+	struct bf atmp;
+	struct bf btmp;
+	bigfloat_assign(&atmp, a);
+	bigfloat_assign(&btmp, b);
 	//these are not neccesary for division, as a/b is always less digits than a (at least for intagers)
-	//int maxDigits = bf_get_maxDigits();
+	int maxDigits = bf_get_maxDigits();
 	//bigfloat_change_exponent(&atmp, maxDigits/2 - 1);
-	//bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
+	bigfloat_change_exponent(&btmp, maxDigits/2 - 1);
 #ifdef BF_DIAGNOSTICS
-	printf("a:  ");
-	bf_diagnostic_print(a);
-	printf("b:  ");
-	bf_diagnostic_print(b);
+	printf("atmp:  ");
+	bf_diagnostic_print(&atmp);
+	printf("btmp:  ");
+	bf_diagnostic_print(&btmp);
 #endif
-	bignum_signed_sub(&a->exponent, &b->exponent, &c->exponent);//add & mul -> sub & div
-	bignum_signed_div(&a->mantissa, &b->mantissa, &c->mantissa);
+	bignum_signed_sub(&atmp.exponent, &btmp.exponent, &c->exponent);//add & mul -> sub & div
+	bignum_signed_div(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 #ifdef BF_DIAGNOSTICS
 	printf("pre normalization:  ");
 	bf_diagnostic_print(c);
@@ -436,7 +448,7 @@ void bigfloat_change_exponent(BN_VAR_PREFIX struct bf* n, int wantedDigits){
 
 void bigfloat_normalize(BN_VAR_PREFIX struct bf* n){
 	//should leave it so that there is one place blank in mantissa, and adjust the exponent accordingly
-	bigfloat_change_exponent(n, bf_get_maxDigits() - 1);
+	bigfloat_change_exponent(n, bf_get_maxDigits() - 2);
 }
 
 
