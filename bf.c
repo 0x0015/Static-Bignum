@@ -120,7 +120,7 @@ int bf_closeWithinEpsilon(double d1, double d2){
 	return (fabs(d1-d2) < BF_EPSILON * fmax(fabs(d1), fabs(d2))); //epsilon is 0.1 for now
 }
 void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
-	double rd = log(d)/log(BF_BASE);//how many powers of bf_base fit in d?
+	double rd = log(d)/log((double)BF_BASE);//how many powers of bf_base fit in d?
 	int r = rd;
 	int er = 0;
 	if(r == 0){
@@ -135,10 +135,10 @@ void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 		er--;
 	}
 	BF_IF_DIAGNOSTIC_INLINE(printf("r=%i (rd=%lf)\n", r, rd);)
-	double rDIV = d / pow(BF_BASE, r);
-	unsigned int rmax = log(MAX_VAL)/log(BF_BASE);
-	int64_t mres = rDIV * pow(BF_BASE, rmax);
-	unsigned int mresr = log(mres)/log(BF_BASE);
+	double rDIV = d / pow((double)BF_BASE, (double)r);
+	unsigned int rmax = log((double)MAX_VAL)/log((double)BF_BASE);
+	int64_t mres = rDIV * pow((double)BF_BASE, (double)rmax);
+	unsigned int mresr = log((double)mres)/log((double)BF_BASE);
 	int64_t exp = -mresr;
 	bignum_signed_from_int(&n->mantissa, mres);
 	bignum_signed_from_int(&n->exponent, exp+r+er);
@@ -148,14 +148,14 @@ void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
 	struct bf tmp;
 	bigfloat_assign(&tmp, n); 
-	unsigned int rmax = log(MAX_VAL)/log(BF_BASE);
+	unsigned int rmax = log((double)MAX_VAL)/log((double)BF_BASE);
 	bigfloat_change_exponent(&tmp, rmax);
 	int64_t man = bignum_signed_to_int(&tmp.mantissa);
 	int64_t exp = bignum_signed_to_int(&tmp.exponent);
-	unsigned int r = log(man)/log(BF_BASE);
+	unsigned int r = log((double)man)/log((double)BF_BASE);
 	BF_IF_DIAGNOSTIC_INLINE(printf("man: %li, exp: %li\n", man, exp);)
 	double output = man;
-	output *= pow(BF_BASE, exp);
+	output *= pow((double)BF_BASE, (double)exp);
 	return(output);
 }
 #endif
