@@ -461,11 +461,21 @@ void bigfloat_normalize(BN_VAR_PREFIX struct bf* n){
 
 
 void bigfloat_inc(BN_VAR_PREFIX struct bf* n){
-	bignum_signed_inc(&n->mantissa);
-	bigfloat_normalize(n);
+	struct bf one;
+	struct bf tmp;
+	bigfloat_from_int(&one, 1);
+	bigfloat_add(n, &one, &tmp);
+	bigfloat_assign(n, &tmp);
+	//bignum_signed_inc(&n->mantissa);
+	//bigfloat_normalize(n);
 }
 
 void bigfloat_dec(BN_VAR_PREFIX struct bf* n){
-	bignum_signed_dec(&n->mantissa);
-	bigfloat_normalize(n);
+	struct bf one;
+	struct bf tmp;
+	bigfloat_from_int(&one, 1);
+	bigfloat_sub(n, &one, &tmp);
+	bigfloat_assign(n, &tmp);
+	//bignum_signed_dec(&n->mantissa);
+	//bigfloat_normalize(n);
 }
