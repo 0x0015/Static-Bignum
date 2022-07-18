@@ -119,7 +119,11 @@ double fmax(double a, double b){
 int bf_closeWithinEpsilon(double d1, double d2){
 	return (fabs(d1-d2) < BF_EPSILON * fmax(fabs(d1), fabs(d2))); //epsilon is 0.1 for now
 }
-void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
+void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double val){
+	double d = val;
+	if(val < 0){
+		d = -d;
+	}
 	double rd = log(d)/log((double)BF_BASE);//how many powers of bf_base fit in d?
 	int r = rd;
 	int er = 0;
@@ -143,6 +147,9 @@ void bigfloat_from_double(BN_VAR_PREFIX struct bf* n, double d){
 	bignum_signed_from_int(&n->mantissa, mres);
 	bignum_signed_from_int(&n->exponent, exp+r+er);
 	BF_IF_DIAGNOSTIC_INLINE(printf("man: %li, exp: %li\n", mres, exp+r+er);)
+	if(val < 0){
+		n->mantissa.sign = 1;
+	}
 	bigfloat_normalize(n);
 }
 double bigfloat_to_double(BN_VAR_PREFIX struct bf* n){
@@ -315,12 +322,31 @@ int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
 			}
 		}
 	}else{
+		if(!a->mantissa.sign && b->mantissa.sign){
+			//a is negative b is positive
+			return(SMALLER);
+		}
+		if(a->mantissa.sign && !b->mantissa.sign){
+			//a is negative b is positive
+			return(LARGER);
+		}
 		int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
 		if(exp_r == EQUAL){
 			int man_r = bignum_signed_cmp(&a->mantissa, &b->mantissa);
 			return(man_r);
 		}else{
-			return exp_r;
+			if(a->mantissa.sign && b->mantissa.sign){
+				switch(exp_r){
+					case LARGER:
+						return SMALLER;
+					case SMALLER:
+						return LARGER;
+					default:
+						return EQUAL;
+				}
+			}else{
+				return exp_r;
+			}
 		}
 	}
 }

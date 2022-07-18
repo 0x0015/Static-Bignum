@@ -7,7 +7,10 @@
 //from https://stackoverflow.com/questions/55766058/how-can-i-generate-random-doubles-in-c
 double rd() {
     uint64_t r53 = ((uint64_t)(rand()) << 21) ^ (rand() >> 2);
-    return (double)r53 / 9007199254740991.0; // 2^53 - 1
+    double o = (double)r53 / 9007199254740991.0; // 2^53 - 1
+    o -= 0.5;
+    o *= 2;
+    return(o);
 }
 
 int closeWithinEpsilon(double d1, double d2){
@@ -33,6 +36,10 @@ void checkConversions(){
 	toutput = bigfloat_to_double(&test);
 	printf("expected: %lf, got %lf\n", currentTest, toutput);
 	currentTest = 0.054543654;
+	bigfloat_from_double(&test, currentTest);
+	toutput = bigfloat_to_double(&test);
+	printf("expected: %lf, got %lf\n", currentTest, toutput);
+	currentTest = -0.054543654;
 	bigfloat_from_double(&test, currentTest);
 	toutput = bigfloat_to_double(&test);
 	printf("expected: %lf, got %lf\n", currentTest, toutput);
@@ -156,6 +163,64 @@ int main(){
 			printf("Incorrect %lf - %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
+	for(unsigned int i=0;i<10000;i++){
+		double ua = rd() * 1000; 
+		double ub = rd() * 1000; 
+		int uc;
+		if(ua < ub)
+			uc = SMALLER;
+		if(ua == ub)
+			uc = EQUAL;
+		if(ua > ub)
+			uc = LARGER;
+		bigfloat_from_double(&a, ua);
+		bigfloat_from_double(&b, ub);
+		int cresult = bigfloat_cmp(&a, &b);
+		double aresult = bigfloat_to_double(&a);
+		double bresult = bigfloat_to_double(&b);
+		if(!closeWithinEpsilon(ua, aresult)){
+			printf("Failed to properly set a\n");
+		}
+		if(!closeWithinEpsilon(ub, bresult)){
+			printf("failed to properly set b\n");
+		}
+		if(uc == cresult){
+			//printf("\tCorrect %lf - %lf = %lf (got %lf)\n", ua, ub, uc, cresult);
+		}else{
+			printf("Incorrect %lf ?? %lf : %i (got %i, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
+		}
+	}
+	/*
+	for(unsigned int i=0;i<10000;i++){
+		double ua = rd();
+		double uc = ua;
+		double ub;
+		double ubaccum = 1;
+		bigfloat_from_double(&a, ua);
+		for(unsigned x=0;x<100;x++){
+			ub = rd() * 10;
+			ubaccum *= ub;
+			bigfloat_from_double(&b, ub);
+			bigfloat_mul(&a, &b, &c);
+			bigfloat_assign(&a, &c);
+			uc = uc * ub;
+		}
+		double aresult = bigfloat_to_double(&a);
+		double bresult = bigfloat_to_double(&b);
+		double cresult = bigfloat_to_double(&c);
+		//if(!closeWithinEpsilon(ua, aresult)){
+		//	printf("Failed to properly set a\n");
+		//}
+		//if(!closeWithinEpsilon(ub, bresult)){
+		//	printf("failed to properly set b\n");
+		//}
+		if(closeWithinEpsilon(cresult, uc)){
+			printf("\tCorrect %lf * %lf = %lf (got %lf)\n", ua, ubaccum, uc, cresult);
+		}else{
+			printf("Incorrect %lf * %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ubaccum, uc, cresult, aresult, bresult);
+		}
+	}
+	*/
 	printf("floating point stress test done.\n");
 	
 }
