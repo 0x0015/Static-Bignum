@@ -163,9 +163,10 @@ int main(){
 			printf("Incorrect %lf - %lf = %lf (got %lf, a=%lf, b=%lf)\n", ua, ub, uc, cresult, aresult, bresult);
 		}
 	}
+
 	for(unsigned int i=0;i<10000;i++){
-		double ua = rd() * 1000; 
-		double ub = rd() * 1000; 
+		double ua = rd();
+		double ub = rd(); 
 		int uc;
 		if(ua < ub)
 			uc = SMALLER;

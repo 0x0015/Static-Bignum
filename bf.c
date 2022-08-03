@@ -301,7 +301,14 @@ void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR
 }
 
 int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
+#ifdef BF_DIAGNOSTICS
+	printf("a: ");
+	bf_diagnostic_print(a);
+	printf("b: ");
+	bf_diagnostic_print(b);
+#endif
 	if(bigfloat_is_zero(a)){
+		BF_IF_DIAGNOSTIC_INLINE(printf("bigfloat_cmp: a=0\n");)
 		if(bigfloat_is_zero(b)){
 			return(EQUAL);
 		}else{
@@ -312,6 +319,7 @@ int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
 			}
 		}
 	}else if(bigfloat_is_zero(b)){
+		BF_IF_DIAGNOSTIC_INLINE(printf("bigfloat_cmp: b=0\n");)
 		if(bigfloat_is_zero(a)){
 			return(EQUAL);
 		}else{
@@ -322,12 +330,12 @@ int bigfloat_cmp(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b){
 			}
 		}
 	}else{
-		if(!a->mantissa.sign && b->mantissa.sign){
-			//a is negative b is positive
+		if(a->mantissa.sign && !b->mantissa.sign){
+			BF_IF_DIAGNOSTIC_INLINE(printf("a is negative b is positive\n");)
 			return(SMALLER);
 		}
-		if(a->mantissa.sign && !b->mantissa.sign){
-			//a is negative b is positive
+		if(!a->mantissa.sign && b->mantissa.sign){
+			BF_IF_DIAGNOSTIC_INLINE(printf("a is negative b is positive\n");)
 			return(LARGER);
 		}
 		int exp_r = bignum_signed_cmp(&a->exponent, &b->exponent);
