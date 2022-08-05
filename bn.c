@@ -294,6 +294,11 @@ void bignum_div(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_P
   require(b, "b is null");
   require(c, "c is null");
 
+  if(bignum_is_zero(b)){
+	  bignum_init(c);
+	  return;
+  }
+
   struct bn current;
   struct bn denom;
   struct bn tmp;
