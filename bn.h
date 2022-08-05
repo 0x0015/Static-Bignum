@@ -19,20 +19,20 @@ The current state is correct functionality and adequate performance.
 There may well be room for performance-optimizations and improvements.
 
 */
-//this is an opencl support thing, so I can set this to private or whatever
+/*this is an opencl support thing, so I can set this to private or whatever*/
 #ifndef BN_VAR_PREFIX
 #define BN_VAR_PREFIX 
 #endif
 
 /*Uncomment line below if stdint shouldn't be included (eg. opencl)*/
-//#define BN_NO_STDINT
+/*#define BN_NO_STDINT*/
 
 /*Uncomment line below if stdio shouldn't be included (disables to/from string operations)*/
-//#define BN_NO_STDIO
+/*#define BN_NO_STDIO  */
 
-//#define BN_NO_ASSERT
+/*#define BN_NO_ASSERT */
 
-//#define BN_NO_STDBOOL
+/*#define BN_NO_STDBOOL*/
 
 #ifndef BN_NO_STDINT
 #include <stdint.h>
@@ -54,7 +54,7 @@ typedef unsigned long uint64_t;
 #define assert(a) 
 #endif
 
-#define BN_BYTES 32 //must be divisable by the word size
+#define BN_BYTES 32 /*must be divisable by the word size*/
 #define BN_BITS (BN_BYTES*8)
 /* This macro defines the word size in bytes of the array that constitues the big-number data structure. */
 #ifndef WORD_SIZE
@@ -100,61 +100,24 @@ typedef unsigned long uint64_t;
   #error DTYPE must be defined to uint8_t, uint16_t uint32_t or whatever
 #endif
 
-
 /* Custom assert macro - easy to disable */
 #define require(p, msg) assert(p && msg)
-
-
-/* Data-holding structure: array of DTYPEs */
-typedef struct bn
-{
-  DTYPE array[BN_ARRAY_SIZE];
-} bn;
-
-#define bn_zero ((bn){0})
-//#define bn_max ((bn){{[0 ... BN_ARRAY_SIZE-1] = MAX_VAL}})
 
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 
-/* Initialization functions: */
-void bignum_init(BN_VAR_PREFIX struct bn* n);
-void bignum_from_int(BN_VAR_PREFIX struct bn* n, DTYPE_TMP i);
-uint32_t  bignum_to_int(BN_VAR_PREFIX struct bn* n);
-DTYPE  bignum_to_DTYPE(BN_VAR_PREFIX struct bn* n);
+#define PPCAT(a, ...) PRIMITIVE_CAT(a, __VA_ARGS__)
+#define PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__
 
-#ifndef BN_NO_STDIO
-void bignum_from_string(BN_VAR_PREFIX struct bn* n, char* str, int nbytes);
-void bignum_to_string(BN_VAR_PREFIX struct bn* n, char* str, int maxsize);
-#endif
-
-/* Basic arithmetic operations: */
-void bignum_add(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a + b */
-void bignum_sub(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a - b */
-void bignum_mul(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a * b */
-void bignum_div(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a / b */
-void bignum_mod(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a % b */
-void bignum_divmod(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c, BN_VAR_PREFIX struct bn* d); /* c = a/b, d = a%b */
-
-/* Bitwise operations: */
-void bignum_and(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a & b */
-void bignum_or(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c);  /* c = a | b */
-void bignum_xor(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* c = a ^ b */
-void bignum_lshift(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, int nbits); /* b = a << nbits */
-void bignum_rshift(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, int nbits); /* b = a >> nbits */
-
-unsigned int bignum_bsr(BN_VAR_PREFIX struct bn* n);
-
-/* Special operators and comparison */
-int  bignum_cmp(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b);               /* Compare: returns LARGER, EQUAL or SMALLER */
-int  bignum_is_zero(BN_VAR_PREFIX const struct bn* n);                         /* For comparison with zero */
-void bignum_inc(BN_VAR_PREFIX struct bn* n);                             /* Increment: add one to n */
-void bignum_dec(BN_VAR_PREFIX struct bn* n);                             /* Decrement: subtract one from n */
-void bignum_pow(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b, BN_VAR_PREFIX struct bn* c); /* Calculate a^b -- e.g. 2^10 => 1024 */
-void bignum_isqrt(BN_VAR_PREFIX struct bn* a, BN_VAR_PREFIX struct bn* b);             /* Integer square root -- e.g. isqrt(5) => 2*/
-void bignum_assign(BN_VAR_PREFIX struct bn* dst, BN_VAR_PREFIX struct bn* src);        /* Copy src into dst -- dst := src */
-
+#define BN_PREFIX
+#define BN_ARRAY_SIZE_MOD 1
+#include "bn_.h"
+#undef BN_PREFIX
+#undef BN_ARRAY_SIZE_MOD
+#define BN_PREFIX _2
+#define BN_ARRAY_SIZE_MOD 2
+#include "bn_.h"
+#undef BN_PREFIX
+#undef BN_ARRAY_SIZE_MOD
 
 #endif /* #ifndef __BIGNUM_H__ */
-
-
