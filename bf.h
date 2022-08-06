@@ -7,6 +7,8 @@
 
 #define BF_BASE 2
 
+//TODO:  used double precision to increase multiplication accuracy
+
 #define BN_PREFIX
 #define BN_ARRAY_SIZE_MOD 1
 #include "bf_.h"
