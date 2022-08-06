@@ -106,8 +106,11 @@ typedef unsigned long uint64_t;
 /* Tokens returned by bignum_cmp() for value comparison */
 enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 
-#define PPCAT(a, ...) PRIMITIVE_CAT(a, __VA_ARGS__)
-#define PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__
+/*#define PPCAT(a, ...) PRIMITIVE_CAT(a, __VA_ARGS__)*/
+/*#define PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__*/
+/*veradic is really not needed, so let's not use it :)*/
+#define PPCAT(a, b) PRIMITIVE_CAT(a, b)
+#define PRIMITIVE_CAT(a, b) a ## b
 
 #define BN_PREFIX
 #define BN_ARRAY_SIZE_MOD 1
