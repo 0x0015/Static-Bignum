@@ -120,4 +120,7 @@ enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
 
+void bignum_to_2(BN_VAR_PREFIX struct bn_2* dst, BN_VAR_PREFIX struct bn* src);
+void bignum_2_to_1(BN_VAR_PREFIX struct bn* dst, BN_VAR_PREFIX struct bn_2* src);
+
 #endif /* #ifndef __BIGNUM_H__ */

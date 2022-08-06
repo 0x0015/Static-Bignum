@@ -44,4 +44,28 @@ There may well be room for performance-optimizations and improvements.
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
 
+void bignum_to_2(BN_VAR_PREFIX struct bn_2* dst, BN_VAR_PREFIX struct bn* src){
+  require(dst, "dst is null");
+  require(src, "src is null");
+
+  bignum_init_2(dst);
+
+  int i;
+  for (i = 0; i < BN_ARRAY_SIZE; ++i)
+  {
+    dst->array[i] = src->array[i];
+  }
+}
+
+void bignum_2_to_1(BN_VAR_PREFIX struct bn* dst, BN_VAR_PREFIX struct bn_2* src){
+  require(dst, "dst is null");
+  require(src, "src is null");
+
+  int i;
+  for (i = 0; i < BN_ARRAY_SIZE; ++i)
+  {
+    dst->array[i] = src->array[i];
+  }
+}
+
 /*add a conversion between bn and bn_2 here*/

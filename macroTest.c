@@ -1,5 +1,6 @@
 #include "bn.h"
 #include "bn_s.h"
+#include "bf.h"
 
 int main(){
 	bn test1;
