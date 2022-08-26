@@ -29,3 +29,5 @@ int PPCAT(bigfloat_is_zero, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)
 
 void PPCAT(bigfloat_normalize, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n);//should happen automatically, but may be useful if you are manipulating the PPCAT(bf, BN_PREFIX) type
 
+//for internal use
+void PPCAT(bigfloat_change_exponent, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int wantedDigits);

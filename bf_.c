@@ -17,12 +17,6 @@ void PPCAT(bf_diagnostic_print, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PRE
 #define BF_IF_DIAGNOSTIC_INLINE(x) 
 #endif
 
-#if BN_ARRAY_SIZE_MOD == 1
-//void PPCAT(bigfloat_change_exponent, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int wantedDigits);
-void bigfloat_change_exponent(struct bf* n, int wantedDigits);
-#else
-void bigfloat_change_exponent_2(struct bf_2* n, int wantedDigits);
-#endif
 int PPCAT(bf_get_maxDigits, BN_PREFIX)();
 void PPCAT(bf_shiftEXP, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int shift);
 unsigned int PPCAT(numPlaces, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bn, BN_PREFIX)* n);
@@ -186,7 +180,6 @@ void PPCAT(bigfloat_sub, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 //#warning using double mul/div
 //defined in the second pass with double precision
 //should always be defined as long as BN_NO_DOUBLE_P is not defined
-void bigfloat_change_exponent_2(struct bf_2* n , int wantedDigits);
 int bf_get_maxDigits_2();
 
 void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
