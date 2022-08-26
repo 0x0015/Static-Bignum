@@ -2,7 +2,7 @@
 #ifdef BF_DIAGNOSTICS
 #include <stdio.h>
 
-void PPCAT(bf, BN_PREFIX)_diagnostic_print(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n){
+void PPCAT(bf_diagnostic_print, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n){
 	double d = PPCAT(bigfloat_to_double, BN_PREFIX)(n);
 	char buf1[1000];
 	char buf2[1000];
@@ -104,9 +104,9 @@ void PPCAT(bigfloat_add, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 				   //just add the mantissa
 #ifdef BF_DIAGNOSTICS
 				     printf("a:  ");
-				     PPCAT(bf, BN_PREFIX)_diagnostic_print(a);
+				     PPCAT(bf_diagnostic_print, BN_PREFIX)(a);
 				     printf("b:  ");
-				     PPCAT(bf, BN_PREFIX)_diagnostic_print(b);
+				     PPCAT(bf_diagnostic_print, BN_PREFIX)(b);
 #endif
 				   //PPCAT(bf_shiftEXP, BN_PREFIX)(a, 1);
 				   //PPCAT(bf_shiftEXP, BN_PREFIX)(b, 1);
@@ -114,7 +114,7 @@ void PPCAT(bigfloat_add, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 				   PPCAT(bignum_signed_assign, BN_PREFIX)(&c->exponent, &a->exponent);
 #ifdef BF_DIAGNOSTICS
 				     printf("pre normalization:  ");
-				     PPCAT(bf, BN_PREFIX)_diagnostic_print(c);
+				     PPCAT(bf_diagnostic_print, BN_PREFIX)(c);
 #endif
 				   PPCAT(bigfloat_normalize, BN_PREFIX)(c);
 				   return;
@@ -131,9 +131,9 @@ void PPCAT(bigfloat_add, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 				    PPCAT(bf_shiftEXP, BN_PREFIX)(&tmp, diff);
 #ifdef BF_DIAGNOSTICS
 				    printf("post shift:  ");
-				    PPCAT(bf, BN_PREFIX)_diagnostic_print(&tmp);
+				    PPCAT(bf_diagnostic_print, BN_PREFIX)(&tmp);
 				    printf("a: ");
-				    PPCAT(bf, BN_PREFIX)_diagnostic_print(a);
+				    PPCAT(bf_diagnostic_print, BN_PREFIX)(a);
 #endif
 				    PPCAT(bignum_signed_add, BN_PREFIX)(&a->mantissa, &tmp.mantissa, &c->mantissa);
 				    PPCAT(bignum_signed_assign, BN_PREFIX)(&c->exponent, &a->exponent);
@@ -153,9 +153,9 @@ void PPCAT(bigfloat_add, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 				     PPCAT(bf_shiftEXP, BN_PREFIX)(&tmp, diff);
 #ifdef BF_DIAGNOSTICS
 				     printf("post shift:  ");
-				     PPCAT(bf, BN_PREFIX)_diagnostic_print(&tmp);
+				     PPCAT(bf_diagnostic_print, BN_PREFIX)(&tmp);
 				     printf("b: ");
-				     PPCAT(bf, BN_PREFIX)_diagnostic_print(b);
+				     PPCAT(bf_diagnostic_print, BN_PREFIX)(b);
 #endif
 				     PPCAT(bignum_signed_add, BN_PREFIX)(&tmp.mantissa, &b->mantissa, &c->mantissa);
 				     PPCAT(bignum_signed_assign, BN_PREFIX)(&c->exponent, &b->exponent);
@@ -176,6 +176,69 @@ void PPCAT(bigfloat_sub, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 	PPCAT(bigfloat_add, BN_PREFIX)(a, &tmp, c);
 }
 
+#if !defined(BN_NO_DOUBLE_P) && BN_ARRAY_SIZE_MOD == 1
+
+//#warning using double mul/div
+//defined in the second pass with double precision
+//should always be defined as long as BN_NO_DOUBLE_P is not defined
+void bigfloat_change_exponent_2(struct bf_2*, int);
+int bf_get_maxDigits_2();
+
+void bigfloat_mul(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
+	//check the sign, and if one is negative subtract that one
+	struct bf_2 atmp;
+	struct bf_2 btmp;
+	struct bf_2 ctmp;
+	bigfloat_to_2(&atmp, a);
+	bigfloat_to_2(&btmp, b);
+	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
+	int maxDigits = bf_get_maxDigits_2();
+	bigfloat_change_exponent_2(&atmp, maxDigits/2 - 1);
+	bigfloat_change_exponent_2(&btmp, maxDigits/2 - 1);
+#ifdef BF_DIAGNOSTICS
+	//printf("atmp:  ");
+	//PPCAT(bf_diagnostic_print, BN_PREFIX)(&atmp);
+	//printf("btmp:  ");
+	//PPCAT(bf_diagnostic_print, BN_PREFIX)(&btmp);
+#endif
+	bignum_signed_add_2(&atmp.exponent, &btmp.exponent, &ctmp.exponent);
+	bignum_signed_mul_2(&atmp.mantissa, &btmp.mantissa, &ctmp.mantissa);
+	bigfloat_normalize_2(&ctmp);
+	bigfloat_2_to_1(c, &ctmp);
+	bigfloat_normalize(c);
+}
+
+void bigfloat_div(BN_VAR_PREFIX struct bf* a, BN_VAR_PREFIX struct bf* b, BN_VAR_PREFIX struct bf* c){
+	if(PPCAT(bigfloat_is_zero, BN_PREFIX)(b)){
+		assert(0);
+		PPCAT(bigfloat_init, BN_PREFIX)(c);
+		return;
+	}
+
+	//check the sign, and if one is negative subtract that one
+	struct bf_2 atmp;
+	struct bf_2 btmp;
+	struct bf_2 ctmp;
+	bigfloat_to_2(&atmp, a);
+	bigfloat_to_2(&btmp, b);
+	//rather than normalizing both a and b at the end (in addition to losing the truncated data), storing a temp var is better.
+	int maxDigits = bf_get_maxDigits_2();
+	//bigfloat_change_exponent_2(&atmp, maxDigits/2 - 1);
+	bigfloat_change_exponent_2(&btmp, maxDigits/2 - 1);
+#ifdef BF_DIAGNOSTICS
+	//printf("atmp:  ");
+	//PPCAT(bf_diagnostic_print, BN_PREFIX)(&atmp);
+	//printf("btmp:  ");
+	//PPCAT(bf_diagnostic_print, BN_PREFIX)(&btmp);
+#endif
+	bignum_signed_sub_2(&atmp.exponent, &btmp.exponent, &ctmp.exponent);
+	bignum_signed_div_2(&atmp.mantissa, &btmp.mantissa, &ctmp.mantissa);
+	bigfloat_normalize_2(&ctmp);
+	bigfloat_2_to_1(c, &ctmp);
+	bigfloat_normalize(c);
+}
+
+#else
 void PPCAT(bigfloat_mul, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a, BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* b, BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* c){
 	//check the sign, and if one is negative subtract that one
 	struct PPCAT(bf, BN_PREFIX) atmp;
@@ -188,9 +251,9 @@ void PPCAT(bigfloat_mul, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 	PPCAT(bigfloat_change_exponent, BN_PREFIX)(&btmp, maxDigits/2 - 1);
 #ifdef BF_DIAGNOSTICS
 	printf("atmp:  ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(&atmp);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(&atmp);
 	printf("btmp:  ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(&btmp);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(&btmp);
 #endif
 	PPCAT(bignum_signed_add, BN_PREFIX)(&atmp.exponent, &btmp.exponent, &c->exponent);
 	PPCAT(bignum_signed_mul, BN_PREFIX)(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
@@ -214,25 +277,27 @@ void PPCAT(bigfloat_div, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a
 	PPCAT(bigfloat_change_exponent, BN_PREFIX)(&btmp, maxDigits/2 - 1);
 #ifdef BF_DIAGNOSTICS
 	printf("atmp:  ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(&atmp);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(&atmp);
 	printf("btmp:  ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(&btmp);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(&btmp);
 #endif
 	PPCAT(bignum_signed_sub, BN_PREFIX)(&atmp.exponent, &btmp.exponent, &c->exponent);//add & mul -> sub & div
 	PPCAT(bignum_signed_div, BN_PREFIX)(&atmp.mantissa, &btmp.mantissa, &c->mantissa);
 #ifdef BF_DIAGNOSTICS
 	printf("pre normalization:  ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(c);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(c);
 #endif
 	PPCAT(bigfloat_normalize, BN_PREFIX)(c);
 }
 
+#endif
+
 int PPCAT(bigfloat_cmp, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* a, BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* b){
 #ifdef BF_DIAGNOSTICS
 	printf("a: ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(a);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(a);
 	printf("b: ");
-	PPCAT(bf, BN_PREFIX)_diagnostic_print(b);
+	PPCAT(bf_diagnostic_print, BN_PREFIX)(b);
 #endif
 	if(PPCAT(bigfloat_is_zero, BN_PREFIX)(a)){
 		BF_IF_DIAGNOSTIC_INLINE(printf("PPCAT(bigfloat_cmp, BN_PREFIX): a=0\n");)
@@ -330,7 +395,7 @@ void PPCAT(bf_shiftEXP, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n,
 	}
 }
 unsigned int PPCAT(numPlaces, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bn, BN_PREFIX)* n){
-	return(BN_BITS - PPCAT(bignum_bsr, BN_PREFIX)(n));
+	return((BN_BITS * BN_ARRAY_SIZE_MOD) - PPCAT(bignum_bsr, BN_PREFIX)(n));
 }
 int PPCAT(bf_get_maxDigits, BN_PREFIX)(){
 	return((BN_BYTES * BN_ARRAY_SIZE_MOD) * 8 - 1);//that was easy

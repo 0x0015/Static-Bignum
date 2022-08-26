@@ -80,8 +80,39 @@ int bf_closeWithinEpsilon(double d1, double d2){
 #include "bf_.c"
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
+
+#ifndef BN_NO_DOUBLE_P
 #define BN_PREFIX _2
 #define BN_ARRAY_SIZE_MOD 2
 #include "bf_.c"
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
+
+void bigfloat_to_2(BN_VAR_PREFIX struct bf_2* dst, BN_VAR_PREFIX struct bf* src){
+	struct bn_s_2 tmp, tmp2;
+	bignum_signed_to_2(&dst->mantissa, &src->mantissa);
+	bignum_signed_to_2(&dst->exponent, &src->exponent);
+	//int maxDig = bf_get_maxDigits();
+	//int maxDig2 = bf_get_maxDigits_2();
+	//int digDiff = maxDig2-maxDig;
+	//bignum_signed_from_int_2(&tmp, digDiff);
+	//bignum_signed_add_2(&tmp, &tmp2, &dst->exponent);
+	bigfloat_normalize_2(dst);
+}
+
+void bigfloat_2_to_1(BN_VAR_PREFIX struct bf* dst, BN_VAR_PREFIX struct bf_2* src){
+	struct bf_2 tmp;
+	bigfloat_assign_2(&tmp, src);
+	bigfloat_change_exponent_2(&tmp, bf_get_maxDigits()-2);
+#ifdef BF_DIAGNOSTICS
+	bf_diagnostic_print_2(&tmp);
+#endif
+	bignum_signed_2_to_1(&dst->mantissa, &tmp.mantissa);
+	bignum_signed_2_to_1(&dst->exponent, &tmp.exponent);
+#ifdef BF_DIAGNOSTICS
+	bf_diagnostic_print(dst);
+#endif
+	bigfloat_normalize(dst);
+}
+
+#endif

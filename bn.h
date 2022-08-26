@@ -117,6 +117,8 @@ enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 #include "bn_.h"
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
+
+#ifndef BN_NO_DOUBLE_P
 #define BN_PREFIX _2
 #define BN_ARRAY_SIZE_MOD 2
 #include "bn_.h"
@@ -125,5 +127,6 @@ enum { SMALLER = -1, EQUAL = 0, LARGER = 1 };
 
 void bignum_to_2(BN_VAR_PREFIX struct bn_2* dst, BN_VAR_PREFIX struct bn* src);
 void bignum_2_to_1(BN_VAR_PREFIX struct bn* dst, BN_VAR_PREFIX struct bn_2* src);
+#endif
 
 #endif /* #ifndef __BIGNUM_H__ */

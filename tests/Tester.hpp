@@ -44,6 +44,16 @@ public:
 	std::function<void(T2&)> getRandomT2;
 	std::function<void(T1&)> printT1;
 	std::function<void(T2&)> printT2;
+	//void populateMultiTests(){
+	//	for(unsigned int i=0;i<testFuncs.size();i++){
+	//		for(unsigned int j=i;j<testFuncs.size();j++){
+	//			
+	//
+	//			//Tester_Func<T1, T2> tf{
+	//		}
+	//	}
+	//
+	//}
 	void test(){
 		if(randomSeed){
 			srand(time(0));

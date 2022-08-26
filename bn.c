@@ -38,6 +38,8 @@ There may well be room for performance-optimizations and improvements.
 #include "bn_.c"
 #undef BN_PREFIX
 #undef BN_ARRAY_SIZE_MOD
+
+#ifndef BN_NO_DOUBLE_P
 #define BN_PREFIX _2
 #define BN_ARRAY_SIZE_MOD 2
 #include "bn_.c"
@@ -67,5 +69,6 @@ void bignum_2_to_1(BN_VAR_PREFIX struct bn* dst, BN_VAR_PREFIX struct bn_2* src)
     dst->array[i] = src->array[i];
   }
 }
+#endif
 
 /*add a conversion between bn and bn_2 here*/
