@@ -18,7 +18,8 @@ void PPCAT(bf_diagnostic_print, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PRE
 #endif
 
 #if BN_ARRAY_SIZE_MOD == 1
-void PPCAT(bigfloat_change_exponent, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int wantedDigits);
+//void PPCAT(bigfloat_change_exponent, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int wantedDigits);
+void bigfloat_change_exponent(struct bf* n, int wantedDigits);
 #else
 void bigfloat_change_exponent_2(struct bf_2* n, int wantedDigits);
 #endif
