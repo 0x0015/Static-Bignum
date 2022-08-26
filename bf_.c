@@ -17,7 +17,9 @@ void PPCAT(bf_diagnostic_print, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PRE
 #define BF_IF_DIAGNOSTIC_INLINE(x) 
 #endif
 
+#if BN_ARRAY_SIZE_MOD != 1
 void PPCAT(bigfloat_change_exponent, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int wantedDigits);
+#endif
 int PPCAT(bf_get_maxDigits, BN_PREFIX)();
 void PPCAT(bf_shiftEXP, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bf, BN_PREFIX)* n, int shift);
 unsigned int PPCAT(numPlaces, BN_PREFIX)(BN_VAR_PREFIX struct PPCAT(bn, BN_PREFIX)* n);
