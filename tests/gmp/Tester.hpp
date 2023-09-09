@@ -11,12 +11,14 @@ public:
 	std::vector<std::string> inputValues;
 	using t1OpFunc = std::function<T1(const T1&, const T1&)>;
 	using t2OpFunc = std::function<T2(const T2&, const T2&)>;
+	using standaloneFunc = std::function<bool(const std::string&)>;
 	struct funcPair{
 		t1OpFunc t1Func;
 		t2OpFunc t2Func;
 		std::string name;
 	};
 	std::vector<funcPair> funcPairs;
+	std::vector<std::pair<standaloneFunc, std::string>> standaloneFuncs;
 
 	unsigned int succeeded = 0;
 	unsigned int failed = 0;
@@ -47,6 +49,12 @@ public:
 		divFunc.t2Func = [](const T2& a, const T2& b){return a / b;};
 		divFunc.name = "/";
 		funcPairs.push_back(divFunc);
+	}
+
+	void autoGenerateStrTest(){
+		standaloneFuncs.push_back({[](const std::string& str){
+			return T2(str).to_string() == str;
+			}, "to_string"});
 	}
 
 	enum testResult{TEST_SUCCEEDED, TEST_FAILED, TEST_NOT_RAN};
@@ -81,6 +89,11 @@ public:
 			}else{
 				gmp_res = gmp_tmp.get_str(16);
 			}
+			
+			//gmp eliminates ALL trailing zeros, even if that's the whole number
+			if(gmp_res == "")
+				gmp_res = "0";
+
 			std::string bn_res = bn_tmp.to_string();
 			if(gmp_res != bn_res){
 				out<<"Failed test! (num1 = "<<num1<<" "<<testFunc.name<<" num2 = "<<num2<<")"<<std::endl;
@@ -95,6 +108,14 @@ public:
 		return TEST_SUCCEEDED;
 	}
 
+	testResult performTest2(const std::string& str, const std::pair<standaloneFunc, std::string>& func, std::ostream& out){
+		if(!func.first(str)){
+			out<<"Failed test \""<<func.second<<"\"! (str = "<<str<<")"<<std::endl;
+			return TEST_FAILED;
+		}
+		return TEST_SUCCEEDED;
+	}
+
 	void test(std::ostream* output = nullptr){
 		std::ostream* out_ptr = &std::cout;
 		if(output != nullptr)
@@ -102,6 +123,14 @@ public:
 		std::ostream& out = *out_ptr;
 
 		for(int i=0;i<inputValues.size();i++){
+			for(auto& stFunc : standaloneFuncs){
+				auto result = performTest2(inputValues[i], stFunc, out);
+				if(result == TEST_SUCCEEDED){
+					succeeded++;
+				}else if(result == TEST_FAILED){
+					failed++;
+				}
+			}
 			for(int j=0;j<inputValues.size();j++){
 				for(int k=0;k<funcPairs.size();k++){
 					auto result = performTest(inputValues[i], inputValues[j], funcPairs[k], out);

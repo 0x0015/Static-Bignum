@@ -30,6 +30,14 @@ template<unsigned int man_size, unsigned int exp_size, unsigned int wordSize> st
 	}
 
 	tester.autoGenerateBasicOpFuncs();
+	tester.autoGenerateStrTest();
+	/*
+	typename decltype(tester)::funcPair plusFunc;
+	plusFunc.t1Func = [](const auto& a, const auto& b){return a + b;};
+	plusFunc.t2Func = [](const auto& a, const auto& b){return a + b;};
+	plusFunc.name = "+";
+	tester.funcPairs.push_back(plusFunc);
+	*/
 	
 	tester.test(&output);
 

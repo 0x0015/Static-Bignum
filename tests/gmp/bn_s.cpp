@@ -30,6 +30,7 @@ template<unsigned int size, unsigned int wordSize> std::string test(){
 	}
 
 	tester.autoGenerateBasicOpFuncs();
+	tester.autoGenerateStrTest();
 	
 	tester.test(&output);
 

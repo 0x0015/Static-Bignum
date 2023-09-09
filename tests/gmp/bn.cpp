@@ -25,6 +25,7 @@ template<unsigned int size, unsigned int wordSize> std::string test(){
 	tester.checkPositive = true;
 
 	tester.autoGenerateBasicOpFuncs();
+	tester.autoGenerateStrTest();
 	
 	tester.test(&output);
 

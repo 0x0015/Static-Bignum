@@ -41,12 +41,40 @@ public:
 		mantissaNorm();
 	}
 	std::string to_string() const{
-		std::string mantissaStr = mantissa.to_string();
-		int dotPos = (int)mantissaStr.length() - (std::abs(exponent.to_int()) / 4);
-		if(dotPos < 0)
-			return "unable to calculate";
+		bf tmp = *this;
+		if(tmp.mantissa.value.is_zero())
+			return "0";
+		//adjust the exponent such that it's a multiple of 4 -> the whole number is a multiple of 16 (0x10)
+		int tmpexp = tmp.exponent.to_int();
+		int exp16 = tmpexp % 4;
+		int newexp = tmpexp - exp16;
+		/*
+		if(tmpexp < 0){
+			newexp = tmpexp + (2 + exp16);
+		}else{
+			newexp = tmpexp - (2 - exp16);
+		}
+		*/
+		tmp.matchExponent(newexp);
+		//std::cout<<"exponent: "<<tmp.exponent.to_string()<<std::endl;
+		std::string mantissaStr = tmp.mantissa.to_string();
+		int dotPos = (int)mantissaStr.length() - (std::abs(tmp.exponent.to_int()) / 4);
+		if(dotPos < 0){
+			//return "unable to calculate";
+			if(tmpexp < 0){
+				std::string zeropad = "";
+				for(int i=dotPos;i<=0;i++)
+					zeropad += '0';
+				mantissaStr = zeropad + mantissaStr;
+			}else{
+				for(int i=dotPos;i<=0;i++)
+					mantissaStr += '0';
+			}
+			dotPos = 0;
+		}
 		//std::cout<<dotPos<<std::endl;
 		std::string out = mantissaStr.substr(0, dotPos) + "." + mantissaStr.substr(dotPos, mantissaStr.length()-dotPos);
+		//std::cout<<"str no dot: "<<out<<std::endl;
 		//remove trailing 0s
 		int lastZero = out.length()-1;
 		for(;lastZero>=0;lastZero--){
@@ -157,7 +185,7 @@ public:
 	constexpr bool operator!=(const bf& other) const{
 		return mantissa != other.mantissa || exponent != other.exponent;
 	}
-	constexpr static std::pair<bf, const bf&> bfMatchExponent(const bf& f1, const bf& f2){
+	constexpr static std::pair<bf, const bf&> bfMatchLargeExponent(const bf& f1, const bf& f2){
 		if(f1.exponent > f2.exponent){
 			bf tmp = f2;
 			tmp.matchExponent(f1.exponent);
@@ -170,7 +198,20 @@ public:
 			return std::pair<bf, const bf&>(f1, f2);
 		}
 	}
-	constexpr static std::pair<bf, bf> bfMatchExponentRetainOrder(const bf& f1, const bf& f2){
+	constexpr static std::pair<bf, const bf&> bfMatchSmallExponent(const bf& f1, const bf& f2){
+		if(f1.exponent < f2.exponent){
+			bf tmp = f2;
+			tmp.matchExponent(f1.exponent);
+			return std::pair<bf, const bf&>(tmp, f1);
+		}else if(f2.exponent < f1.exponent){
+			bf tmp = f1;
+			tmp.matchExponent(f2.exponent);
+			return std::pair<bf, const bf&>(tmp, f2);
+		}else{
+			return std::pair<bf, const bf&>(f1, f2);
+		}
+	}
+	constexpr static std::pair<bf, bf> bfMatchLargeExponentRetainOrder(const bf& f1, const bf& f2){
 		if(f1.exponent > f2.exponent){
 			bf tmp = f2;
 			tmp.matchExponent(f1.exponent);
@@ -183,16 +224,32 @@ public:
 			return std::pair<bf, const bf&>(f1, f2);
 		}
 	}
+	constexpr static std::pair<bf, bf> bfMatchSmallExponentRetainOrder(const bf& f1, const bf& f2){
+		if(f1.exponent < f2.exponent){
+			bf tmp = f2;
+			tmp.matchExponent(f1.exponent);
+			return std::pair<bf, bf>(f1, tmp);
+		}else if(f2.exponent < f1.exponent){
+			bf tmp = f1;
+			tmp.matchExponent(f2.exponent);
+			return std::pair<bf, const bf&>(tmp, f2);
+		}else{
+			return std::pair<bf, const bf&>(f1, f2);
+		}
+	}
 	constexpr bf operator+(const bf& other) const{
-		std::pair<bf, const bf&> exponentMatched = bfMatchExponent(*this, other);
+		std::pair<bf, const bf&> exponentMatched = bfMatchSmallExponent(*this, other);
 		bf output;
 		output.exponent = exponentMatched.first.exponent;
 		output.mantissa = exponentMatched.first.mantissa + exponentMatched.second.mantissa;
+		//std::cout<<output.mantissa.to_string()<<std::endl;
+		//std::cout<<output.exponent.to_string()<<std::endl;
+		//std::cout<<output.to_string()<<std::endl;
 		output.mantissaNorm();
 		return output;
 	}
 	constexpr bf operator-(const bf& other) const{
-		std::pair<bf, bf> exponentMatched = bfMatchExponentRetainOrder(*this, other);
+		std::pair<bf, bf> exponentMatched = bfMatchSmallExponentRetainOrder(*this, other);
 		bf output;
 		output.exponent = exponentMatched.first.exponent;
 		output.mantissa = exponentMatched.first.mantissa - exponentMatched.second.mantissa;
@@ -224,11 +281,16 @@ public:
 		return output;
 	}
 	constexpr bf operator/(const bf& other) const{
-		bn_s<MAN_SIZE * 2, WORD_SIZE> matchMan1 = mantissa.template resize<MAN_SIZE * 2>();
-		bn_s<MAN_SIZE * 2, WORD_SIZE> matchMan2 = other.mantissa.template resize<MAN_SIZE * 2>();
+		bf<MAN_SIZE * 2, EXP_SIZE, WORD_SIZE> match1;
+		bf<MAN_SIZE * 2, EXP_SIZE, WORD_SIZE> match2;
+		match1.mantissa = mantissa.template resize<MAN_SIZE * 2>();
+		match1.exponent = exponent;
+		match2.mantissa = other.mantissa.template resize<MAN_SIZE * 2>();
+		match2.exponent = other.exponent;
+		match1.mantissaNorm();
 		bf<MAN_SIZE * 2, EXP_SIZE, WORD_SIZE> o2;
-		o2.exponent = exponent - other.exponent;
-		o2.mantissa = matchMan1 / matchMan2;
+		o2.exponent = match1.exponent - match2.exponent;
+		o2.mantissa = match1.mantissa / match2.mantissa;
 		o2.mantissaBaseExpMatch(maxExponentInMantissa());
 		bf output;
 		output.exponent = o2.exponent;
