@@ -40,7 +40,7 @@ public:
 		exponent.from_int(-pastDot * 4);
 		mantissaNorm();
 	}
-	std::string to_string() const{
+	std::string to_string() const{//TODO
 		bf tmp = *this;
 		if(tmp.mantissa.value.is_zero())
 			return "0";
@@ -58,6 +58,12 @@ public:
 		tmp.matchExponent(newexp);
 		//std::cout<<"exponent: "<<tmp.exponent.to_string()<<std::endl;
 		std::string mantissaStr = tmp.mantissa.to_string();
+
+		bool strHasNeg = false;
+		if(mantissaStr.length() > 0 && mantissaStr[0] == '-'){
+			strHasNeg = true;
+			mantissaStr = mantissaStr.substr(1, mantissaStr.length() - 2);
+		}
 		int dotPos = (int)mantissaStr.length() - (std::abs(tmp.exponent.to_int()) / 4);
 		if(dotPos < 0){
 			//return "unable to calculate";
@@ -85,6 +91,9 @@ public:
 		//remove trailing .
 		if(out[out.length()-1] == '.')
 			out = out.substr(0, out.length()-1);
+
+		if(strHasNeg)
+			out = "-" + out;
 
 		return out;
 	}
@@ -296,6 +305,37 @@ public:
 		output.exponent = o2.exponent;
 		output.mantissa = o2.mantissa.template resize<MAN_SIZE>();
 		return output;
+	}
+	constexpr bool operator<(const bf& other) const{
+		if(other.mantissa.isNegative() == mantissa.isNegative()){
+			if(exponent < other.exponent)
+				return !mantissa.isNegative();
+			else if(exponent > other.exponent)
+				return mantissa.isNegative();
+			else
+				return mantissa < other.mantissa;
+		
+		}else{
+			return mantissa.isNegative();
+		}
+	}
+	constexpr bool operator>(const bf& other) const{
+		if(other.mantissa.isNegative() == mantissa.isNegative()){
+			if(exponent < other.exponent)
+				return mantissa.isNegative();
+			else if(exponent > other.exponent)
+				return !mantissa.isNegative();
+			else
+				return mantissa > other.mantissa;
+		}else{
+			return !mantissa.isNegative();
+		}
+	}
+	constexpr bool operator<=(const bf& other) const{
+		return !(*this > other);
+	}
+	constexpr bool operator>=(const bf& other) const{
+		return !(*this < other);
 	}
 };
 

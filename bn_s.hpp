@@ -140,7 +140,7 @@ public:
 		if(otherNeg && !thisNeg)
 			return false;
 		if(thisNeg && otherNeg)
-			return value > other.value;
+			return !(value >= other.value);
 		return value < other.value;
 	}
 	constexpr bool operator>(const bn_s& other) const{
@@ -151,7 +151,7 @@ public:
 		if(!otherNeg && thisNeg)
 			return false;
 		if(thisNeg && otherNeg)
-			return value < other.value;
+			return ! (value <= other.value);
 		return value > other.value;
 	}
 	constexpr bool operator==(const bn_s& other) const{

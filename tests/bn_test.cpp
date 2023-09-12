@@ -9,7 +9,7 @@ int main(){
 	std::cout<<(a-b).to_string()<<std::endl;
 	std::cout<<(a*b).to_string()<<std::endl;
 	std::cout<<(a/b).to_string()<<std::endl;
-	bf<512> test;
-	std::cout<<bf<512>::getBasePower(4).to_string()<<std::endl;
+	//bf<512> test;
+	//std::cout<<bf<512>::getBasePower(4).to_string()<<std::endl;
 	return 0;
 }
